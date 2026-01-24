@@ -2,26 +2,26 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
 	isOpen: false,
-	vehicleId: null
+	repairId: null
 };
 
 const slice = createSlice({
 	initialState,
-	name: 'vehicleEditor',
+	name: 'vehicleRepairEditor',
 	reducers: {
 		setIsOpen(state, action) {
 			state.isOpen = action.payload;
 		},
-		setVehicleId(state, action) {
-			state.vehicleId = action.payload;
+		setRepairId(state, action) {
+			state.repairId = action.payload;
 		}
 	},
 	selectors: {
 		selectIsOpen: (state) => state.isOpen,
-		selectVehicleId: (state) => state.vehicleId
+		selectRepairId: (state) => state.repairId
 	}
 });
 
 export default slice;
-export const { setIsOpen, setVehicleId } = slice.actions;
-export const { selectIsOpen, selectVehicleId } = slice.selectors;
+export const { setIsOpen, setRepairId } = slice.actions;
+export const { selectIsOpen, selectRepairId } = slice.selectors;

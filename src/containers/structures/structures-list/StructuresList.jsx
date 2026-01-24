@@ -9,41 +9,35 @@ import {
 	Paper
 } from '@mui/material';
 import DataTable from '@/components/table/DataTable';
-import VehicleRow from '@/components/table/VehicleRow';
+import StructureRow from '@/components/table/StructureRow';
 import Add from '@mui/icons-material/Add';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
-import { useListCurrenciesQuery, useListVehiclesQuery } from '@/state/api/rootApi';
+import { useListCurrenciesQuery, useListStructuresQuery } from '@/state/api/rootApi';
 import { selectUserId } from '@/state/features/authSlice';
-import { selectArchivedFilteredVehicles } from '@/containers/vehicles/vehicles-list/selectors';
+import { selectArchivedFilteredStructures } from '@/containers/structures/structures-list/selectors';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
 import { selectShowArchived, setShowArchived } from './slice';
 import React, { useMemo, useCallback } from 'react';
 
-const vehicleListColumns = [
-	'Name',
-	'Year',
-	'Make',
-	'Model',
-	'Date Purchased',
-	'Mileage at Purchase',
-	'Purchase Price',
-	'VIN',
-	'License Plate',
-	'Key Code'
+const structureListColumns = [
+	'Description',
+	'How Acquired',
+	'Acquisition Date',
+	'Cost'
 ];
 
-const VehiclesList = () => {
+const StructuresList = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const userId = useSelector(selectUserId);
-	const vehicles = useSelector(selectArchivedFilteredVehicles);
+	const structures = useSelector(selectArchivedFilteredStructures);
 	const showArchived = useSelector(selectShowArchived);
 
 	// RTK Query hooks
-	const { isLoading, error, isError, refetch } = useListVehiclesQuery(userId, {
+	const { isLoading, error, isError, refetch } = useListStructuresQuery(userId, {
 		skip: !userId // Skip if no user ID
 	});
 
@@ -51,24 +45,24 @@ const VehiclesList = () => {
 		skip: !userId
 	});
 
-	const onEdit = useCallback((vehicleId) => {
-		navigate(`${vehicleId}/edit`);
+	const onEdit = useCallback((structureId) => {
+		navigate(`${structureId}/edit`);
 	}, [navigate]);
 
-	const onShowRepairs = useCallback((vehicleId) => {
-		navigate(`${vehicleId}/repairs`);
+	const onShowRepairs = useCallback((structureId) => {
+		navigate(`${structureId}/repairs`);
 	}, [navigate]);
 
 	const tableRows = useMemo(() => {
-		return vehicles.map((vehicle) => (
-			<VehicleRow
-				key={vehicle.vehicle_id}
-				vehicle={vehicle}
+		return structures.map((structure) => (
+			<StructureRow
+				key={structure.structure_id}
+				structure={structure}
 				currencies={currencies}
 				onEdit={(id) => onEdit(id)}
 				onShowRepairs={(id) => onShowRepairs(id)} />
 		));
-	}, [vehicles, currencies, onEdit, onShowRepairs]);
+	}, [structures, currencies, onEdit, onShowRepairs]);
 
 	const showArchivedButton = useMemo(() => {
 		const onToggleArchived = () => {
@@ -83,14 +77,14 @@ const VehiclesList = () => {
 							checked={showArchived}
 							onChange={onToggleArchived} />
 					}
-					label="Show Archived Vehicles" />
+					label="Show Archived Structures" />
 			</FormGroup>);
 	}, [dispatch, showArchived]);
 
 	if (!userId) {
 		return (
 			<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
-				<Alert severity="warning">Please log in to view vehicles.</Alert>
+				<Alert severity="warning">Please log in to view structures.</Alert>
 			</Box>
 		);
 	}
@@ -107,7 +101,7 @@ const VehiclesList = () => {
 		return (
 			<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
 				<Alert severity="error">
-					Error loading vehicles: {error.message}
+					Error loading structures: {error.message}
 					<Button onClick={refetch} sx={{ ml: 1 }}>
 						Retry
 					</Button>
@@ -121,14 +115,14 @@ const VehiclesList = () => {
 			<Outlet />
 			<PageLayout>
 				<ListHeaderLayout
-					addButtonText="Add Vehicle"
+					addButtonText="Add Structure"
 					addButtonAction={() => navigate('create')}
 					additionalContent={showArchivedButton}
-					titleText="Vehicles" />
-				<DataTable columnLabels={vehicleListColumns} rows={tableRows} />
+					titleText="Structures" />
+				<DataTable columnLabels={structureListColumns} rows={tableRows} />
 			</PageLayout>
 		</>
 	);
 };
 
-export default VehiclesList;
+export default StructuresList;

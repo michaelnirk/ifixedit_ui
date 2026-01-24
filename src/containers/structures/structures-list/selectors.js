@@ -3,10 +3,7 @@ import { rootApi } from '@/state/api/rootApi';
 import { selectShowArchived } from '@/containers/vehicles/vehicles-list/slice';
 import { selectUserId } from '@/state/features/authSlice';
 
-// const selectVehiclesData = (state) =>
-//   rootApi.endpoints.listVehicles.select()(state)?.data || [];
-
-const selectVehiclesData = createSelector(
+const selectStructuresData = createSelector(
 	[
 		(state) => state,
 		selectUserId
@@ -17,18 +14,18 @@ const selectVehiclesData = createSelector(
 		}
 
 		// Use RTK Query's built-in selector to get cached data
-		const queryResult = rootApi.endpoints.listVehicles.select(userId)(state);
+		const queryResult = rootApi.endpoints.listStructures.select(userId)(state);
 		return queryResult?.data || [];
 	}
 );
 
-export const selectArchivedFilteredVehicles = createSelector(
-	selectVehiclesData,
+export const selectArchivedFilteredStructures = createSelector(
+	selectStructuresData,
 	selectShowArchived,
-	(vehicles = [], showArchived) => {
+	(structures = [], showArchived) => {
 		if (showArchived) {
-			return vehicles;
+			return structures;
 		}
-		return vehicles.filter((vehicle) => !vehicle.archived);
+		return structures.filter((structure) => !structure.archived);
 	}
 );

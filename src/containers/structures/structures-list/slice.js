@@ -7,7 +7,7 @@ const initialState = {
 
 const slice = createSlice({
 	initialState,
-	name: 'vehiclesList',
+	name: 'structuresList',
 	reducers: {
 		setSearchFilter(state, action) {
 			state.searchFilter = action.payload;
