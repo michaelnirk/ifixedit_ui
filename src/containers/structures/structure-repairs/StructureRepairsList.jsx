@@ -1,17 +1,17 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet, useParams } from 'react-router-dom';
+import { showNotification } from '@/state/features/notificationSlice';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
-import Notification from '@/components/Notification.jsx';
-import VehicleRepairRow from '@/components/table/VehicleRepairRow';
-import { showNotification } from '@/state/features/notificationSlice';
+import StructureRepairRow from '@/components/table/StructureRepairRow';
 import {
 	useListRepairsQuery,
 	useDeleteRepairMutation,
 	useListCurrenciesQuery,
-	useGetVehicleQuery
+	useGetStructureQuery
 } from '@/state/api/rootApi';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
@@ -22,29 +22,28 @@ import { useConfirm } from 'material-ui-confirm';
 const repairsListColumns = [
 	'Repair Description',
 	'Repair Date',
-	'Repair Location',
-	'Mileage at Repair',
+	'Repair Performed By',
 	'Repair Cost'
 ];
 
-const VehicleRepairsList = () => {
+const StructureRepairsList = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const { vehicleId } = useParams();
+	const { structureId } = useParams();
 	const userId = useSelector(selectUserId);
 	const confirm = useConfirm();
 
 	// RTK Query hooks
-	const { data: repairsData = [], isLoading, isError: isRepairsError } = useListRepairsQuery({ entityId: vehicleId, userId }, {
-		skip: !userId || !vehicleId // Skip if no user ID or vehicle ID
+	const { data: repairsData = [], isLoading, isError: isRepairsError } = useListRepairsQuery({ entityId: structureId, userId }, {
+		skip: !userId || !structureId // Skip if no user ID or structure ID
 	});
 
-	const { data: currencies = [], isLoading: currenciesLoading, isError: isCurrenciesError } = useListCurrenciesQuery(userId, {
+	const { data: currencies = [], isError: isCurrenciesError, isLoading: currenciesLoading } = useListCurrenciesQuery(userId, {
 		skip: !userId
 	});
 
-	const { data: vehicleData } = useGetVehicleQuery({ userId, vehicleId }, {
-		skip: !userId || !vehicleId
+	const { data: structureData, isError: isStructureError } = useGetStructureQuery({ structureId, userId }, {
+		skip: !userId || !structureId
 	});
 
 	const [deleteRepair] = useDeleteRepairMutation();
@@ -59,6 +58,12 @@ const VehicleRepairsList = () => {
 		if (confirmed) {
 			try {
 				await deleteRepair({ repairId, userId }).unwrap();
+				dispatch(showNotification({
+					alertVariant: 'filled',
+					autoCloseDuration: 3000,
+					message: 'Repair deleted successfully',
+					severity: 'success'
+				}));
 			} catch {
 				dispatch(showNotification({
 					alertVariant: 'filled',
@@ -66,18 +71,12 @@ const VehicleRepairsList = () => {
 					severity: 'error'
 				}));
 			}
-			dispatch(showNotification({
-				alertVariant: 'filled',
-				autoCloseDuration: 3000,
-				message: 'Repair deleted successfully',
-				severity: 'success'
-			}));
 		}
 	}, [confirm, deleteRepair, userId, dispatch]);
 
 	const tableRows = useMemo(() => {
 		return repairsData.map((repair) => (
-			<VehicleRepairRow
+			<StructureRepairRow
 				key={repair.repair_id}
 				repair={repair}
 				currencies={currencies}
@@ -88,33 +87,31 @@ const VehicleRepairsList = () => {
 	}, [repairsData, currencies, navigate, onDeleteRepair]);
 
 	const pageTitle = useMemo(() => {
-		return vehicleData ? `Repairs for ${vehicleData.name}` : 'Repairs';
-	}, [vehicleData]);
+		return structureData ? `Repairs for ${structureData.name}` : 'Repairs';
+	}, [structureData]);
 
-	if (!userId || !vehicleId) {
-		return <Alert severity="warning">Please log in and select a vehicle to view repairs.</Alert>;
+	if (!userId || !structureId) {
+		return <Alert severity="warning">Please log in and select a structure to view repairs.</Alert>;
 	}
 
 	if (isLoading || currenciesLoading) {
 		return (
-			<>
-				<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
-					<CircularProgress />
-				</Box>
-			</>
+			<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
+				<CircularProgress />
+			</Box>
 		);
 	}
 
-	if (isRepairsError || isCurrenciesError) {
+	if (isRepairsError || isCurrenciesError || isStructureError) {
 		dispatch(showNotification({
 			alertVariant: 'filled',
-			message: `Error loading ${isRepairsError ? 'repairs' : 'currencies'}`,
+			message: `Error loading ${isRepairsError ? 'repairs' : isCurrenciesError ? 'currencies' : 'structure details'}`,
 			severity: 'error'
 		}));
 	}
 
 	return (
-		!isRepairsError && !isCurrenciesError && (
+		!isRepairsError && !isCurrenciesError && !isStructureError && (
 			<>
 				<Outlet />
 				<PageLayout>
@@ -129,4 +126,4 @@ const VehicleRepairsList = () => {
 	);
 };
 
-export default VehicleRepairsList;
+export default StructureRepairsList;

@@ -4,7 +4,6 @@ import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import CarRepairIcon from '@mui/icons-material/CarRepair';
 import Edit from '@mui/icons-material/Edit';
-import Archive from '@mui/icons-material/Archive';
 import BadgeComponent from '@/components/Badge';
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
@@ -36,6 +35,16 @@ const VehicleRow = ({ vehicle, currencies = [], onEdit, onShowRepairs }) => {
 			<TableCell>{vehicle.key_code}</TableCell>
 			<TableCell>
 				<div style={{ display: 'flex' }}>
+					<Tooltip
+						arrow
+						placement="top"
+						title={`Edit ${vehicle.name}`}>
+						<IconButton
+							onClick={() => onEdit(vehicle.vehicle_id)}
+							size="small">
+							<Edit />
+						</IconButton>
+					</Tooltip>
 					<BadgeComponent content={vehicle?.repair_count || 0}>
 						<Tooltip
 							arrow
@@ -48,16 +57,6 @@ const VehicleRow = ({ vehicle, currencies = [], onEdit, onShowRepairs }) => {
 							</IconButton>
 						</Tooltip>
 					</BadgeComponent>
-					<Tooltip
-						arrow
-						placement="top"
-						title={`Edit ${vehicle.name}`}>
-						<IconButton
-							onClick={() => onEdit(vehicle.vehicle_id)}
-							size="small">
-							<Edit />
-						</IconButton>
-					</Tooltip>
 				</div>
 			</TableCell>
 		</TableRow>

@@ -1,17 +1,16 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet, useParams } from 'react-router-dom';
+import { showNotification } from '@/state/features/notificationSlice';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
-import Notification from '@/components/Notification.jsx';
 import VehicleRepairRow from '@/components/table/VehicleRepairRow';
-import { showNotification } from '@/state/features/notificationSlice';
 import {
 	useListRepairsQuery,
 	useDeleteRepairMutation,
 	useListCurrenciesQuery,
-	useGetVehicleQuery
+	useGetEquipmentQuery
 } from '@/state/api/rootApi';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
@@ -22,29 +21,28 @@ import { useConfirm } from 'material-ui-confirm';
 const repairsListColumns = [
 	'Repair Description',
 	'Repair Date',
-	'Repair Location',
-	'Mileage at Repair',
+	'Repair Performed By',
 	'Repair Cost'
 ];
 
-const VehicleRepairsList = () => {
+const EquipmentRepairsList = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const { vehicleId } = useParams();
+	const { equipmentId } = useParams();
 	const userId = useSelector(selectUserId);
 	const confirm = useConfirm();
 
 	// RTK Query hooks
-	const { data: repairsData = [], isLoading, isError: isRepairsError } = useListRepairsQuery({ entityId: vehicleId, userId }, {
-		skip: !userId || !vehicleId // Skip if no user ID or vehicle ID
+	const { data: repairsData = [], isLoading, isError: isRepairsError } = useListRepairsQuery({ entityId: equipmentId, userId }, {
+		skip: !userId || !equipmentId // Skip if no user ID or equipment ID
 	});
 
-	const { data: currencies = [], isLoading: currenciesLoading, isError: isCurrenciesError } = useListCurrenciesQuery(userId, {
+	const { data: currencies = [], isError: isCurrenciesError, isLoading: currenciesLoading } = useListCurrenciesQuery(userId, {
 		skip: !userId
 	});
 
-	const { data: vehicleData } = useGetVehicleQuery({ userId, vehicleId }, {
-		skip: !userId || !vehicleId
+	const { data: equipmentData, isError: isEquipmentError } = useGetEquipmentQuery({ equipmentId, userId }, {
+		skip: !userId || !equipmentId
 	});
 
 	const [deleteRepair] = useDeleteRepairMutation();
@@ -59,6 +57,12 @@ const VehicleRepairsList = () => {
 		if (confirmed) {
 			try {
 				await deleteRepair({ repairId, userId }).unwrap();
+				dispatch(showNotification({
+					alertVariant: 'filled',
+					autoCloseDuration: 3000,
+					message: 'Repair deleted successfully',
+					severity: 'success'
+				}));
 			} catch {
 				dispatch(showNotification({
 					alertVariant: 'filled',
@@ -66,12 +70,6 @@ const VehicleRepairsList = () => {
 					severity: 'error'
 				}));
 			}
-			dispatch(showNotification({
-				alertVariant: 'filled',
-				autoCloseDuration: 3000,
-				message: 'Repair deleted successfully',
-				severity: 'success'
-			}));
 		}
 	}, [confirm, deleteRepair, userId, dispatch]);
 
@@ -88,33 +86,31 @@ const VehicleRepairsList = () => {
 	}, [repairsData, currencies, navigate, onDeleteRepair]);
 
 	const pageTitle = useMemo(() => {
-		return vehicleData ? `Repairs for ${vehicleData.name}` : 'Repairs';
-	}, [vehicleData]);
+		return equipmentData ? `Repairs for ${equipmentData.name}` : 'Repairs';
+	}, [equipmentData]);
 
-	if (!userId || !vehicleId) {
-		return <Alert severity="warning">Please log in and select a vehicle to view repairs.</Alert>;
+	if (!userId || !equipmentId) {
+		return <Alert severity="warning">Please log in and select an equipment item to view repairs.</Alert>;
 	}
 
 	if (isLoading || currenciesLoading) {
 		return (
-			<>
-				<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
-					<CircularProgress />
-				</Box>
-			</>
+			<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
+				<CircularProgress />
+			</Box>
 		);
 	}
 
-	if (isRepairsError || isCurrenciesError) {
+	if (isRepairsError || isCurrenciesError || isEquipmentError) {
 		dispatch(showNotification({
 			alertVariant: 'filled',
-			message: `Error loading ${isRepairsError ? 'repairs' : 'currencies'}`,
+			message: `Error loading ${isRepairsError ? 'repairs' : isCurrenciesError ? 'currencies' : 'equipment details'}`,
 			severity: 'error'
 		}));
 	}
 
 	return (
-		!isRepairsError && !isCurrenciesError && (
+		!isRepairsError && !isCurrenciesError && !isEquipmentError && (
 			<>
 				<Outlet />
 				<PageLayout>
@@ -129,4 +125,4 @@ const VehicleRepairsList = () => {
 	);
 };
 
-export default VehicleRepairsList;
+export default EquipmentRepairsList;

@@ -19,31 +19,30 @@ import { selectUserId } from '@/state/features/authSlice';
 import { selectIsOpen, setIsOpen } from './slice';
 import { showNotification } from '@/state/features/notificationSlice';
 import { useForm, Controller } from 'react-hook-form';
-import {
-	useGetRepairPartQuery,
-	useCreateRepairPartMutation,
-	useUpdateRepairPartMutation,
+import { useGetRepairQuery,
+	useCreateRepairMutation,
+	useUpdateRepairMutation,
 	useListCurrenciesQuery,
-	useGetRepairQuery
+	useGetStructureQuery
 } from '@/state/api/rootApi';
 import { useNotes } from '@/useNotes.jsx';
 
-const VehicleRepairPartEditor = () => {
+const StructureRepairEditor = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const { repairId, partId } = useParams();
+	const { structureId, repairId } = useParams();
 	const userId = useSelector(selectUserId);
 	const isOpen = useSelector(selectIsOpen);
-	const { data: repairPart, isError: isRepairPartError, isLoading } = useGetRepairPartQuery(
-		partId && userId ? { partId, userId } : skipToken
+	const { data: repair, isError: isRepairError, isLoading } = useGetRepairQuery(
+		repairId && userId ? { repairId, userId } : skipToken
 	);
 
 	const { data: currencies = [], isError: isCurrenciesError } = useListCurrenciesQuery(userId, {
 		skip: !userId
 	});
 
-	const { data: repairData, isError: isRepairError } = useGetRepairQuery({ repairId, userId }, {
-		skip: !userId || !repairId
+	const { data: structureData, isError: isStructureError } = useGetStructureQuery({ structureId, userId }, {
+		skip: !userId || !structureId
 	});
 
 	useEffect(() => {
@@ -52,75 +51,72 @@ const VehicleRepairPartEditor = () => {
 
 	const { control, handleSubmit, getValues, formState: { errors }, setValue } = useForm({
 		defaultValues: {
-			brand: '',
 			description: '',
+			end_item_id: '',
+			km_at_repair: '',
 			notes: [],
-			part_cost: '',
-			part_cost_currency: 10049, // Default to USD
-			part_id: null,
-			part_number: '',
-			purchase_date: null,
-			qty: '',
-			repair_id: repairId,
-			source: ''
+			repair_cost: '',
+			repair_cost_currency: 10049, // Default to USD
+			repair_date: null,
+			repair_id: '',
+			repair_location: ''
 		}
 	});
 
-	const [createRepairPart, { isLoading: isCreating }] = useCreateRepairPartMutation();
-	const [updateRepairPart, { isLoading: isUpdating }] = useUpdateRepairPartMutation();
-	const { NotesSection } = useNotes({ control });
+	const [createRepair, { isLoading: isCreating }] = useCreateRepairMutation();
+	const [updateRepair, { isLoading: isUpdating }] = useUpdateRepairMutation();
+	const { NotesSection } = useNotes({ control, name: 'notes' });
 
 	// Populate form when repair data is loaded (edit mode)
 	useEffect(() => {
-		if (repairPart && partId) {
-			setValue('part_id', repairPart.part_id || null);
-			setValue('repair_id', repairId);
-			setValue('brand', repairPart.brand || '');
-			setValue('description', repairPart.description || '');
-			setValue('notes', repairPart.notes || []);
-			setValue('part_cost', repairPart.part_cost || '');
-			setValue('part_cost_currency', repairPart.part_cost_currency || '');
-			setValue('part_number', repairPart.part_number || '');
-			setValue('purchase_date', repairPart.purchase_date ? dayjs(repairPart.purchase_date) : null);
-			setValue('qty', repairPart.qty || '');
-			setValue('source', repairPart.source || '');
+		if (repair && repairId) {
+			setValue('end_item_id', repair.end_item_id);
+			setValue('repair_id', repair.repair_id);
+			setValue('description', repair.description);
+			setValue('repair_location', repair.repair_location || '');
+			setValue('repair_date', repair.repair_date ? dayjs(repair.repair_date) : null);
+			setValue('km_at_repair', repair.km_at_repair || '');
+			setValue('repair_cost', repair.repair_cost || '');
+			setValue('repair_cost_currency', repair.repair_cost_currency || '');
+			setValue('notes', repair.notes || []);
 		}
-	}, [repairPart, partId, setValue, repairId]);
+	}, [repair, repairId, setValue]);
 
-	const onSubmit = async (repairPartData) => {
+	const onSubmit = async (repairData) => {
 		try {
-			// Format purchase_date to 'YYYY-MM-DD HH:mm:ss' or null
+			// Format repair_date to 'YYYY-MM-DD HH:mm:ss' or null
 			const dataToSubmit = {
-				...repairPartData,
-				purchase_date: repairPartData.purchase_date ? dayjs(repairPartData.purchase_date).format('YYYY-MM-DD HH:mm:ss') : null
+				...repairData,
+				end_item_id: structureId,
+				repair_date: repairData.repair_date ? dayjs(repairData.repair_date).format('YYYY-MM-DD HH:mm:ss') : null
 			};
 
-			if (partId) {
-				await updateRepairPart({
-					partId,
-					repairPartData: dataToSubmit,
+			if (repairId) {
+				await updateRepair({
+					repairData: dataToSubmit,
+					repairId,
 					userId
 				}).unwrap();
 			} else {
-				await createRepairPart({
-					repairPartData: dataToSubmit,
+				await createRepair({
+					repairData: dataToSubmit,
 					userId
 				}).unwrap();
 			}
+			dispatch(showNotification({
+				alertVariant: 'filled',
+				autoCloseDuration: 3000,
+				message: `Repair ${repairId ? 'updated' : 'created'} successfully!`,
+				severity: 'success'
+			}));
 			navigate('..');
 		} catch {
 			dispatch(showNotification({
 				alertVariant: 'filled',
-				message: `Failed to ${partId ? 'update' : 'create'} repair part`,
+				message: `Failed to ${repairId ? 'update' : 'create'} repair`,
 				severity: 'error'
 			}));
 		}
-		dispatch(showNotification({
-			alertVariant: 'filled',
-			autoCloseDuration: 3000,
-			message: `Repair part ${partId ? 'updated' : 'created'} successfully!`,
-			severity: 'success'
-		}));
 	};
 
 	const onBack = () => {
@@ -133,26 +129,25 @@ const VehicleRepairPartEditor = () => {
 	};
 
 	const titleText = useMemo(() => {
-		const repairName = repairData ? repairData.description : '';
-		if (partId) {
-			return `Edit Repair Part for ${repairName}`;
+		if (repairId) {
+			return 'Edit Repair';
 		} else {
-			return `Add New Repair Part for ${repairName}`;
+			return `Create New Repair for ${structureData ? structureData.name : ''}`;
 		}
-	}, [partId, repairData]);
+	}, [repairId, structureData]);
 
 	const submitButtonLabel = useMemo(() => {
-		return isCreating || isUpdating ? 'Saving...' : (partId ? 'Update Repair Part' : 'Create Repair Part');
-	}, [isCreating, isUpdating, partId]);
+		return isCreating || isUpdating ? 'Saving...' : (repairId ? 'Update Repair' : 'Create Repair');
+	}, [isCreating, isUpdating, repairId]);
 
 	if (!userId) {
 		return <Alert severity="warning">Please log in to manage repairs.</Alert>;
 	}
 
-	if (isRepairPartError || isRepairError || isCurrenciesError) {
+	if (isRepairError || isCurrenciesError || isStructureError) {
 		dispatch(showNotification({
 			alertVariant: 'filled',
-			message: `Error loading ${isRepairPartError ? 'repair part' : isRepairError ? 'repair data' : 'currencies'}`,
+			message: `Error loading ${isRepairError ? 'repair' : isCurrenciesError ? 'currencies' : 'structure details'}`,
 			severity: 'error'
 		}));
 	}
@@ -181,14 +176,16 @@ const VehicleRepairPartEditor = () => {
 								<Controller
 									name="description"
 									control={control}
-									rules={{ required: 'Part Description is required' }}
+									rules={{ required: 'Description is required' }}
 									render={
 										({ field }) => (
 											<TextField
 												{...field}
+												autoFocus
 												sx={{ flex: 12 }}
 												margin="normal"
-												label="Part Description *"
+												label="Repair Description *"
+												fullWidth
 												size="small"
 												error={!!errors.description}
 												helperText={errors.description ? errors.description.message : ''} />
@@ -197,78 +194,36 @@ const VehicleRepairPartEditor = () => {
 							</InputRow>
 							<InputRow>
 								<Controller
-									name="part_number"
+									name="performed_by"
 									control={control}
-									render={
-										({ field }) => (
-											<TextField
-												{...field}
-												sx={{ flex: 4 }}
-												margin="normal"
-												label="Part Number"
-												size="small" />
-										)
-									} />
-								<Controller
-									name="brand"
-									control={control}
-									render={
-										({ field }) => (
-											<TextField
-												{...field}
-												sx={{ flex: 4 }}
-												margin="normal"
-												label="Brand"
-												size="small" />
-										)
-									} />
-								<Controller
-									name="source"
-									control={control}
-									render={
-										({ field }) => (
-											<TextField
-												{...field}
-												sx={{ flex: 4 }}
-												margin="normal"
-												label="Source"
-												size="small" />
-										)
-									} />
-							</InputRow>
-							<InputRow>
-								<Controller
-									name="qty"
-									control={control}
-									rules={{ required: 'Quantity is required' }}
 									render={
 										({ field }) => (
 											<TextField
 												{...field}
 												sx={{ flex: 3 }}
 												margin="normal"
-												label="Quantity *"
-												size="small"
-												type="number"
-												error={!!errors.qty}
-												helperText={errors.qty ? errors.qty.message : ''} />
+												label="Repair Performed By"
+												size="small" />
 										)
 									} />
 								<Controller
-									name="purchase_date"
+									name="repair_date"
 									control={control}
+									rules={{ required: 'Repair date is required' }}
 									render={
 										({ field }) => (
 											<DatePicker
 												{...field}
 												format="DD MMMM YYYY"
-												label="Purchase Date"
+												label="Repair Date *"
 												sx={{ flex: 3 }}
-												slotProps={{ textField: { margin: 'normal', size: 'small' } }} />
+												slotProps={{ textField: { margin: 'normal', size: 'small' } }}
+												error={!!errors.repair_date}
+												helperText={errors.repair_date ? errors.repair_date.message : ''} />
 										)
 									} />
 								<Controller
-									name="part_cost"
+									name="repair_cost"
 									control={control}
 									render={
 										({ field }) => (
@@ -276,7 +231,7 @@ const VehicleRepairPartEditor = () => {
 												{...field}
 												sx={{ flex: 3 }}
 												margin="normal"
-												label="Part Cost"
+												label="Repair Cost"
 												size="small"
 												type="number"
 												step="0.01" />
@@ -284,7 +239,7 @@ const VehicleRepairPartEditor = () => {
 									} />
 
 								<Controller
-									name="part_cost_currency"
+									name="repair_cost_currency"
 									control={control}
 									render={
 										({ field }) => (
@@ -292,7 +247,7 @@ const VehicleRepairPartEditor = () => {
 												{...field}
 												sx={{ flex: 3 }}
 												margin="normal"
-												label="Part Cost Currency"
+												label="Repair Cost Currency"
 												select
 												size="small">
 												{
@@ -300,7 +255,7 @@ const VehicleRepairPartEditor = () => {
 														<MenuItem
 															key={currency.currency_id}
 															value={currency.currency_id}
-															selected={currency.currency_id === getValues('part_cost_currency')}>
+															selected={currency.currency_id === getValues('repair_cost_currency')}>
 															{currency.currency_symbol}
 														</MenuItem>
 													))
@@ -322,4 +277,4 @@ const VehicleRepairPartEditor = () => {
 	);
 };
 
-export default VehicleRepairPartEditor;
+export default StructureRepairEditor;

@@ -19,13 +19,13 @@ const RouterBreadcrumbs = () => {
 	});
 
 	return (
-		<Breadcrumbs aria-label="breadcrumb" sx={{ backgroundColor: 'rgb(127, 174, 219)', pb: 1, pl: 2, pt: 1 }}>
+		<Breadcrumbs aria-label="breadcrumb" sx={{ backgroundColor: 'rgb(32, 53, 79)', color: 'rgb(206, 212, 218)', pb: 1, pl: 2, pt: 1 }}>
 			{/* Home link is always the first one */}
 			<MuiLink
 				component={RouterLink}
 				to="/"
-				color="inherit"
-				sx={{ alignItems: 'center', display: 'flex' }}>
+				underline="none"
+				sx={{ '&:hover': { color: '#ffffff', textDecoration: 'none' }, alignItems: 'center', color: 'rgb(206, 212, 218)', display: 'flex' }}>
 				Home
 			</MuiLink>
 
@@ -45,7 +45,7 @@ const RouterBreadcrumbs = () => {
 
 					return isLastItem || Number.isFinite(Number(name)) ? (
 					// The last item (current page) should be Typography, not a link
-						<Typography color="text.primary" key={routeTo}>
+						<Typography sx={{ color: 'rgb(206, 212, 218)' }} key={routeTo}>
 							{crumbName}
 						</Typography>
 					) : (
@@ -54,7 +54,8 @@ const RouterBreadcrumbs = () => {
 							component={RouterLink}
 							to={routeTo}
 							key={routeTo}
-							color="inherit">
+							underline="none"
+							sx={{ '&:hover': { color: '#ffffff', textDecoration: 'none' }, color: 'rgb(206, 212, 218)' }}>
 							{crumbName}
 						</MuiLink>
 					);

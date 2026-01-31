@@ -1,18 +1,13 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet } from 'react-router-dom';
-import {
-	Box,
-	Button,
-	Typography,
-	CircularProgress,
-	Alert,
-	Paper
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
 import VehicleRow from '@/components/table/VehicleRow';
-import Add from '@mui/icons-material/Add';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import { showNotification } from '@/state/features/notificationSlice';
 import Switch from '@mui/material/Switch';
 import { useListCurrenciesQuery, useListVehiclesQuery } from '@/state/api/rootApi';
 import { selectUserId } from '@/state/features/authSlice';
@@ -43,11 +38,11 @@ const VehiclesList = () => {
 	const showArchived = useSelector(selectShowArchived);
 
 	// RTK Query hooks
-	const { isLoading, error, isError, refetch } = useListVehiclesQuery(userId, {
+	const { isLoading, isError: isVehiclesError } = useListVehiclesQuery(userId, {
 		skip: !userId // Skip if no user ID
 	});
 
-	const { data: currencies = [], isLoading: currenciesLoading } = useListCurrenciesQuery(userId, {
+	const { data: currencies = [], isError: isCurrenciesError, isLoading: currenciesLoading } = useListCurrenciesQuery(userId, {
 		skip: !userId
 	});
 
@@ -103,31 +98,28 @@ const VehiclesList = () => {
 		);
 	}
 
-	if (isError) {
-		return (
-			<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
-				<Alert severity="error">
-					Error loading vehicles: {error.message}
-					<Button onClick={refetch} sx={{ ml: 1 }}>
-						Retry
-					</Button>
-				</Alert>
-			</Box>
-		);
+	if (isVehiclesError || isCurrenciesError) {
+		dispatch(showNotification({
+			alertVariant: 'filled',
+			message: `Error loading ${isVehiclesError ? 'vehicles' : 'currencies'}`,
+			severity: 'error'
+		}));
 	}
 
 	return (
-		<>
-			<Outlet />
-			<PageLayout>
-				<ListHeaderLayout
-					addButtonText="Add Vehicle"
-					addButtonAction={() => navigate('create')}
-					additionalContent={showArchivedButton}
-					titleText="Vehicles" />
-				<DataTable columnLabels={vehicleListColumns} rows={tableRows} />
-			</PageLayout>
-		</>
+		!isVehiclesError && !isCurrenciesError && (
+			<>
+				<Outlet />
+				<PageLayout>
+					<ListHeaderLayout
+						addButtonText="Add Vehicle"
+						addButtonAction={() => navigate('create')}
+						additionalContent={showArchivedButton}
+						titleText="Vehicles" />
+					<DataTable columnLabels={vehicleListColumns} rows={tableRows} />
+				</PageLayout>
+			</>
+		)
 	);
 };
 

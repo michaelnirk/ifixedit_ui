@@ -6,7 +6,7 @@ const initialState = {
 
 const slice = createSlice({
 	initialState,
-	name: 'vehicleRepairEditor',
+	name: 'equipmentRepairEditor',
 	reducers: {
 		setIsOpen(state, action) {
 			state.isOpen = action.payload;

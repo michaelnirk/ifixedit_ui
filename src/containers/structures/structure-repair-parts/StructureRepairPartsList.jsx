@@ -1,5 +1,6 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet, useParams } from 'react-router-dom';
+import { showNotification } from '@/state/features/notificationSlice';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -8,7 +9,6 @@ import DataTable from '@/components/table/DataTable';
 import RepairPartRow from '@/components/table/RepairPartRow';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
-import { showNotification } from '@/state/features/notificationSlice';
 import {
 	useListRepairPartsQuery,
 	useDeleteRepairPartMutation,
@@ -28,9 +28,9 @@ const repairPartsListColumns = [
 	'Date Purchased'
 ];
 
-const VehicleRepairPartsList = () => {
-	const confirm = useConfirm();
+const StructureRepairPartsList = () => {
 	const dispatch = useDispatch();
+	const confirm = useConfirm();
 	const navigate = useNavigate();
 	const { repairId } = useParams();
 	const userId = useSelector(selectUserId);
@@ -56,6 +56,12 @@ const VehicleRepairPartsList = () => {
 		if (confirmed) {
 			try {
 				await deleteRepairPart({ partId, userId }).unwrap();
+				dispatch(showNotification({
+					alertVariant: 'filled',
+					autoCloseDuration: 3000,
+					message: 'Repair part deleted successfully',
+					severity: 'success'
+				}));
 			} catch {
 				dispatch(showNotification({
 					alertVariant: 'filled',
@@ -63,14 +69,8 @@ const VehicleRepairPartsList = () => {
 					severity: 'error'
 				}));
 			}
-			dispatch(showNotification({
-				alertVariant: 'filled',
-				autoCloseDuration: 3000,
-				message: 'Repair part deleted successfully',
-				severity: 'success'
-			}));
 		}
-	}, [confirm, deleteRepairPart, dispatch, userId]);
+	}, [confirm, deleteRepairPart, userId, dispatch]);
 
 	const tableRows = useMemo(() => {
 		return repairPartsData.map((part) => (
@@ -90,9 +90,11 @@ const VehicleRepairPartsList = () => {
 
 	if (isLoading || currenciesLoading) {
 		return (
-			<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
-				<CircularProgress />
-			</Box>
+			<>
+				<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
+					<CircularProgress />
+				</Box>
+			</>
 		);
 	}
 
@@ -120,4 +122,4 @@ const VehicleRepairPartsList = () => {
 	);
 };
 
-export default VehicleRepairPartsList;
+export default StructureRepairPartsList;

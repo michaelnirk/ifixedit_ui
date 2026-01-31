@@ -28,7 +28,7 @@ import {
 } from '@/state/api/rootApi';
 import { useNotes } from '@/useNotes.jsx';
 
-const VehicleRepairPartEditor = () => {
+const StructureRepairPartEditor = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const { repairId, partId } = useParams();
@@ -107,6 +107,12 @@ const VehicleRepairPartEditor = () => {
 					userId
 				}).unwrap();
 			}
+			dispatch(showNotification({
+				alertVariant: 'filled',
+				autoCloseDuration: 3000,
+				message: `Repair part ${partId ? 'updated' : 'created'} successfully!`,
+				severity: 'success'
+			}));
 			navigate('..');
 		} catch {
 			dispatch(showNotification({
@@ -115,12 +121,6 @@ const VehicleRepairPartEditor = () => {
 				severity: 'error'
 			}));
 		}
-		dispatch(showNotification({
-			alertVariant: 'filled',
-			autoCloseDuration: 3000,
-			message: `Repair part ${partId ? 'updated' : 'created'} successfully!`,
-			severity: 'success'
-		}));
 	};
 
 	const onBack = () => {
@@ -149,7 +149,7 @@ const VehicleRepairPartEditor = () => {
 		return <Alert severity="warning">Please log in to manage repairs.</Alert>;
 	}
 
-	if (isRepairPartError || isRepairError || isCurrenciesError) {
+	if (isRepairPartError || isCurrenciesError || isRepairError) {
 		dispatch(showNotification({
 			alertVariant: 'filled',
 			message: `Error loading ${isRepairPartError ? 'repair part' : isRepairError ? 'repair data' : 'currencies'}`,
@@ -322,4 +322,4 @@ const VehicleRepairPartEditor = () => {
 	);
 };
 
-export default VehicleRepairPartEditor;
+export default StructureRepairPartEditor;

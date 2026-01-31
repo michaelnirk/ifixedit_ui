@@ -30,10 +30,17 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const rootApi = createApi({
 	baseQuery: baseQueryWithReauth,
 	endpoints: (builder) => ({
+		createEquipment: builder.mutation({
+			invalidatesTags: ['Equipment'],
+			query: ({ equipmentData, userId }) => ({
+				body: equipmentData,
+				method: 'POST',
+				url: `/${userId}/equipment`
+			})
+		}),
 		createRepair: builder.mutation({
 			invalidatesTags: ['Repair', 'Vehicle'],
 			query: ({ repairData, userId }) => {
-				console.log('repairApi list query called with userId:', userId);
 				return {
 					body: repairData,
 					method: 'POST',
@@ -44,13 +51,20 @@ export const rootApi = createApi({
 		createRepairPart: builder.mutation({
 			invalidatesTags: ['Part', 'Repair'],
 			query: ({ repairPartData, userId }) => {
-				console.log('repairApi list query called with userId:', userId);
 				return {
 					body: repairPartData,
 					method: 'POST',
 					url: `/${userId}/parts`
 				};
 			}
+		}),
+		createStructure: builder.mutation({
+			invalidatesTags: ['Structure'],
+			query: ({ structureData, userId }) => ({
+				body: structureData,
+				method: 'POST',
+				url: `/${userId}/structures`
+			})
 		}),
 		createVehicle: builder.mutation({
 			invalidatesTags: ['Vehicle'],
@@ -99,6 +113,10 @@ export const rootApi = createApi({
 				url: `/${userId}/vehicles/${vehicleId}`
 			})
 		}),
+		getEquipment: builder.query({
+			providesTags: (result, error, { equipmentId }) => [{ id: equipmentId, type: 'Equipment' }],
+			query: ({ equipmentId, userId }) => `/${userId}/equipment/${equipmentId}`
+		}),
 		getRepair: builder.query({
 			providesTags: (result, error, { repairId }) => [{ id: repairId, type: 'Repair' }],
 			query: ({ repairId, userId }) => `/${userId}/repairs/${repairId}`
@@ -107,9 +125,22 @@ export const rootApi = createApi({
 			providesTags: (result, error, { partId }) => [{ id: partId, type: 'Part' }],
 			query: ({ partId, userId }) => `/${userId}/parts/${partId}`
 		}),
+		getStructure: builder.query({
+			providesTags: (result, error, { structureId }) => [{ id: structureId, type: 'Structure' }],
+			query: ({ userId, structureId }) => `/${userId}/structures/${structureId}`
+		}),
 		getVehicle: builder.query({
 			providesTags: (result, error, { vehicleId }) => [{ id: vehicleId, type: 'Vehicle' }],
 			query: ({ userId, vehicleId }) => `/${userId}/vehicles/${vehicleId}`
+		}),
+		listAcquisitionMethods: builder.query({
+			providesTags: ['AcquisitionMethod'],
+			query: (userId) => {
+				if (!userId) {
+					throw new Error('User ID is required');
+				}
+				return `/${userId}/acquisition_methods`;
+			}
 		}),
 		listCurrencies: builder.query({
 			providesTags: ['Currency'],
@@ -129,6 +160,15 @@ export const rootApi = createApi({
 				return `/${userId}/end_items`;
 			}
 		}),
+		listEquipment: builder.query({
+			providesTags: ['Equipment'],
+			query: (userId) => {
+				if (!userId) {
+					throw new Error('User ID is required');
+				}
+				return `/${userId}/equipment`;
+			}
+		}),
 		listRepairParts: builder.query({
 			providesTags: ['Part'],
 			query: ({ userId, repairId }) => {
@@ -144,14 +184,14 @@ export const rootApi = createApi({
 		}),
 		listRepairs: builder.query({
 			providesTags: ['Repair'],
-			query: ({ userId, vehicleId }) => {
+			query: ({ entityId, userId }) => {
 				if (!userId) {
 					throw new Error('User ID is required');
 				}
-				if (!vehicleId) {
-					throw new Error('Vehicle ID is required');
+				if (!entityId) {
+					throw new Error('Entity ID is required');
 				}
-				const url = `/${userId}/repairs/${vehicleId}/all`;
+				const url = `/${userId}/repairs/${entityId}/all`;
 				return url;
 			}
 		}),
@@ -190,6 +230,17 @@ export const rootApi = createApi({
 				url: '/logout'
 			})
 		}),
+		updateEquipment: builder.mutation({
+			invalidatesTags: (result, error, { equipmentId }) => [
+				{ id: equipmentId, type: 'Equipment' },
+				'Equipment' // This will invalidate the list query
+			],
+			query: ({ equipmentId, equipmentData, userId }) => ({
+				body: equipmentData,
+				method: 'PUT',
+				url: `/${userId}/equipment/${equipmentId}`
+			})
+		}),
 		updateRepair: builder.mutation({
 			invalidatesTags: (result, error, { repairId }) => [
 				{ id: repairId, type: 'Repair' },
@@ -212,6 +263,17 @@ export const rootApi = createApi({
 				url: `/${userId}/parts/${partId}`
 			})
 		}),
+		updateStructure: builder.mutation({
+			invalidatesTags: (result, error, { structureId }) => [
+				{ id: structureId, type: 'Structure' },
+				'Structure' // This will invalidate the list query
+			],
+			query: ({ structureId, structureData, userId }) => ({
+				body: structureData,
+				method: 'PUT',
+				url: `/${userId}/structures/${structureId}`
+			})
+		}),
 		updateVehicle: builder.mutation({
 			invalidatesTags: (result, error, { vehicleId }) => [
 				{ id: vehicleId, type: 'Vehicle' },
@@ -226,31 +288,38 @@ export const rootApi = createApi({
 	}),
 	reducerPath: 'rootApi',
 	// Use the base query with reauth handling
-	tagTypes: ['Currency', 'Note', 'Vehicle', 'Repair', 'EndItem', 'Part']
+	tagTypes: ['Currency', 'Note', 'Vehicle', 'Repair', 'EndItem', 'Part', 'Structure', 'AcquisitionMethod', 'Equipment']
 });
 
 export const {
+	useCreateEquipmentMutation,
+	useCreateRepairMutation,
+	useCreateRepairPartMutation,
+	useCreateStructureMutation,
+	useCreateVehicleMutation,
+	useDeleteNoteMutation,
+	useDeleteRepairMutation,
+	useDeleteRepairPartMutation,
+	useGetEquipmentQuery,
+	useGetRepairPartQuery,
+	useGetRepairQuery,
+	useGetStructureQuery,
+	useGetVehicleQuery,
+	useListCurrenciesQuery,
+	useListAcquisitionMethodsQuery,
+	useListEndItemsQuery,
+	useListEquipmentQuery,
+	useListRepairPartsQuery,
+	useListRepairsQuery,
+	useListStructuresQuery,
+	useListVehiclesQuery,
 	useLoginMutation,
 	useLogoutMutation,
-	useListEndItemsQuery,
-	useListCurrenciesQuery,
-	useDeleteNoteMutation,
-	useListVehiclesQuery,
-	useGetVehicleQuery,
-	useCreateVehicleMutation,
-	useUpdateVehicleMutation,
-	useDeleteVehicleMutation,
-	useListRepairsQuery,
-	useGetRepairQuery,
-	useCreateRepairMutation,
+	useUpdateEquipmentMutation,
 	useUpdateRepairMutation,
-	useDeleteRepairMutation,
-	useListRepairPartsQuery,
-	useGetRepairPartQuery,
-	useCreateRepairPartMutation,
 	useUpdateRepairPartMutation,
-	useDeleteRepairPartMutation
+	useUpdateStructureMutation,
+	useUpdateVehicleMutation
 	// Export additional hooks as you add endpoints
 } = rootApi;
-export const { getVehicle, getRepair, getRepairPart } = rootApi.endpoints;
 export default rootApi;

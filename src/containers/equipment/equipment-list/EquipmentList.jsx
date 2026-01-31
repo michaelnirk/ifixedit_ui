@@ -1,40 +1,38 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet } from 'react-router-dom';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
-import StructureRow from '@/components/table/StructureRow';
+import EquipmentItemRow from '@/components/table/EquipmentItemRow';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import { showNotification } from '@/state/features/notificationSlice';
 import Switch from '@mui/material/Switch';
-import { useListAcquisitionMethodsQuery, useListCurrenciesQuery, useListStructuresQuery } from '@/state/api/rootApi';
+import { useListCurrenciesQuery, useListEquipmentQuery } from '@/state/api/rootApi';
 import { selectUserId } from '@/state/features/authSlice';
-import { selectArchivedFilteredStructures } from '@/containers/structures/structures-list/selectors';
+import { selectArchivedFilteredEquipment } from '@/containers/equipment/equipment-list/selectors';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
 import { selectShowArchived, setShowArchived } from './slice';
-import { showNotification } from '@/state/features/notificationSlice';
 import React, { useMemo, useCallback } from 'react';
 
-const structureListColumns = [
+const equipmentListColumns = [
 	'Name',
 	'Description',
-	'How Acquired',
 	'Acquisition Date',
 	'Cost'
 ];
 
-const StructuresList = () => {
+const EquipmentList = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const userId = useSelector(selectUserId);
-	const structures = useSelector(selectArchivedFilteredStructures);
+	const equipment = useSelector(selectArchivedFilteredEquipment);
 	const showArchived = useSelector(selectShowArchived);
 
 	// RTK Query hooks
-	const { isLoading, isError: isStructuresError } = useListStructuresQuery(userId, {
+	const { isLoading, isError: isEquipmentError } = useListEquipmentQuery(userId, {
 		skip: !userId // Skip if no user ID
 	});
 
@@ -42,29 +40,24 @@ const StructuresList = () => {
 		skip: !userId
 	});
 
-	const { data: acquisitionMethods = [], isError: isAcquisitionMethodsError, isLoading: acquisitionMethodsLoading } = useListAcquisitionMethodsQuery(userId, {
-		skip: !userId
-	});
-
-	const onEdit = useCallback((structureId) => {
-		navigate(`${structureId}/edit`);
+	const onEdit = useCallback((equipmentId) => {
+		navigate(`${equipmentId}/edit`);
 	}, [navigate]);
 
-	const onShowRepairs = useCallback((structureId) => {
-		navigate(`${structureId}/repairs`);
+	const onShowRepairs = useCallback((equipmentId) => {
+		navigate(`${equipmentId}/repairs`);
 	}, [navigate]);
 
 	const tableRows = useMemo(() => {
-		return structures.map((structure) => (
-			<StructureRow
-				key={structure.structure_id}
-				structure={structure}
+		return equipment.map((equipmentItem) => (
+			<EquipmentItemRow
+				key={equipmentItem.equipment_id}
+				equipmentItem={equipmentItem}
 				currencies={currencies}
-				acquisitionMethods={acquisitionMethods}
 				onEdit={(id) => onEdit(id)}
 				onShowRepairs={(id) => onShowRepairs(id)} />
 		));
-	}, [structures, currencies, acquisitionMethods, onEdit, onShowRepairs]);
+	}, [equipment, currencies, onEdit, onShowRepairs]);
 
 	const showArchivedButton = useMemo(() => {
 		const onToggleArchived = () => {
@@ -79,19 +72,19 @@ const StructuresList = () => {
 							checked={showArchived}
 							onChange={onToggleArchived} />
 					}
-					label="Show Archived Structures" />
+					label="Show Archived Equipment" />
 			</FormGroup>);
 	}, [dispatch, showArchived]);
 
 	if (!userId) {
 		return (
 			<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
-				<Alert severity="warning">Please log in to view structures.</Alert>
+				<Alert severity="warning">Please log in to view equipment.</Alert>
 			</Box>
 		);
 	}
 
-	if (isLoading || currenciesLoading || acquisitionMethodsLoading) {
+	if (isLoading || currenciesLoading) {
 		return (
 			<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
 				<CircularProgress />
@@ -99,29 +92,29 @@ const StructuresList = () => {
 		);
 	}
 
-	if (isStructuresError || isCurrenciesError || isAcquisitionMethodsError) {
+	if (isEquipmentError || isCurrenciesError) {
 		dispatch(showNotification({
 			alertVariant: 'filled',
-			message: `Error loading ${isStructuresError ? 'structures' : isCurrenciesError ? 'currencies' : 'acquisition methods'}`,
+			message: `Error loading ${isEquipmentError ? 'equipment' : 'currencies'}`,
 			severity: 'error'
 		}));
 	}
 
 	return (
-		!isStructuresError && !isCurrenciesError && !isAcquisitionMethodsError && (
+		!isEquipmentError && !isCurrenciesError && (
 			<>
 				<Outlet />
 				<PageLayout>
 					<ListHeaderLayout
-						addButtonText="Add Structure"
+						addButtonText="Add Equipment Item"
 						addButtonAction={() => navigate('create')}
 						additionalContent={showArchivedButton}
-						titleText="Structures" />
-					<DataTable columnLabels={structureListColumns} rows={tableRows} />
+						titleText="Equipment" />
+					<DataTable columnLabels={equipmentListColumns} rows={tableRows} />
 				</PageLayout>
 			</>
 		)
 	);
 };
 
-export default StructuresList;
+export default EquipmentList;

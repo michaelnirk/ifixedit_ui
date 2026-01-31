@@ -3,9 +3,19 @@ import AppLayout from '@/components/app-layout/AppLayout.jsx';
 import Login from '@/containers/Login.jsx';
 import HomePage from '@/containers/HomePage.jsx';
 import VehiclesList from '@/containers/vehicles/vehicles-list/VehiclesList.jsx';
-import VehicleEditor from '@/containers/vehicles/vehicles-editor/VehicleEditor.jsx';
-// import StructuresList from "@/containers/StructuresList.jsx";
-// import EquipmentList from "@/containers/EquipmentList.jsx";
+import VehicleEditor from '@/containers/vehicles/vehicle-editor/VehicleEditor.jsx';
+import StructuresList from '@/containers/structures/structures-list/StructuresList.jsx';
+import StructureEditor from '@/containers/structures/structure-editor/StructureEditor.jsx';
+import StructureRepairsList from '@/containers/structures/structure-repairs/StructureRepairsList.jsx';
+import StructureRepairEditor from '@/containers/structures/structure-repairs/StructureRepairEditor.jsx';
+import StructureRepairPartsList from '@/containers/structures/structure-repair-parts/StructureRepairPartsList.jsx';
+import StructureRepairPartEditor from '@/containers/structures/structure-repair-parts/StructureRepairPartEditor.jsx';
+import EquipmentEditor from '@/containers/equipment/equipment-editor/EquipmentEditor.jsx';
+import EquipmentList from '@/containers/equipment/equipment-list/EquipmentList.jsx';
+import EquipmentRepairsList from '@/containers/equipment/equipment-repairs/EquipmentRepairsList.jsx';
+import EquipmentRepairEditor from '@/containers/equipment/equipment-repairs/EquipmentRepairEditor.jsx';
+import EquipmentRepairPartsList from '@/containers/equipment/equipment-repair-parts/EquipmentRepairPartsList.jsx';
+import EquipmentRepairPartEditor from '@/containers/equipment/equipment-repair-parts/EquipmentRepairPartEditor.jsx';
 import VehicleRepairsList from '@/containers/vehicles/vehicle-repairs/VehicleRepairsList.jsx';
 import VehicleRepairEditor from '@/containers/vehicles/vehicle-repairs/VehicleRepairEditor.jsx';
 import VehicleRepairPartsList from '@/containers/vehicles/vehicle-repair-parts/VehicleRepairPartsList.jsx';
@@ -67,82 +77,90 @@ const router = createBrowserRouter([
 				element: <VehiclesList />,
 				path: '/vehicles'
 			},
-			// {
-			//     path: "/structures",
-			//     element: <StructuresList />,
-			//     children: [
-			//         {
-			//             path: "create",
-			//             element: <StructureEditor />
-			//         },
-			//         {
-			//             path: ":structureId/edit",
-			//             element: <StructureEditor />
-			//         },
-			//         {
-			//           path: ":structureId/repairs",
-			//           element: <StructureRepairsList />
-			//         },
-			//         {
-			//           path: ":structureId/repairs/create",
-			//           element: <StructureRepairEditor />
-			//         },
-			//         {
-			//           path: ":structureId/repairs/:repairId/edit",
-			//           element: <StructureRepairEditor />
-			//         },
-			//         {
-			//           path: ":structureId/repairs/:repairId/parts",
-			//           element: <StructureRepairPartsList />
-			//         },
-			//         {
-			//           path: ":structureId/repairs/:repairId/parts/create",
-			//           element: <StructureRepairPartEditor />
-			//         },
-			//         {
-			//           path: ":structureId/repairs/:repairId/parts/:partId/edit",
-			//           element: <StructureRepairPartEditor />
-			//         }
-			//     ]
-			// },
-			// {
-			//     path: "/equipment",
-			//     element: <EquipmentList />,
-			//     children: [
-			//         {
-			//             path: "create",
-			//             element: <EquipmentEditor />
-			//         },
-			//         {
-			//             path: ":equipmentId/edit",
-			//             element: <EquipmentEditor />
-			//         },
-			//         {
-			//           path: ":equipmentId/repairs",
-			//           element: <EquipmentRepairsList />
-			//         },
-			//         {
-			//           path: ":equipmentId/repairs/create",
-			//           element: <EquipmentRepairEditor />
-			//         },
-			//         {
-			//           path: ":equipmentId/repairs/:repairId/edit",
-			//           element: <EquipmentRepairEditor />
-			//         },
-			//         {
-			//           path: ":equipmentId/repairs/:repairId/parts",
-			//           element: <EquipmentRepairPartsList />
-			//         },
-			//         {
-			//           path: ":equipmentId/repairs/:repairId/parts/create",
-			//           element: <EquipmentRepairPartEditor />
-			//         },
-			//         {
-			//           path: ":equipmentId/repairs/:repairId/parts/:partId/edit",
-			//           element: <EquipmentRepairPartEditor />
-			//         }
-			//     ]
-			// },
+			{
+				children: [
+					{
+						element: <StructureEditor />,
+						path: 'create'
+					},
+					{
+						element: <StructureEditor />,
+						path: ':structureId/edit'
+					},
+					{
+						children: [
+							{
+								element: <StructureRepairEditor />,
+								path: 'create'
+							},
+							{
+								element: <StructureRepairEditor />,
+								path: ':repairId/edit'
+							},
+							{
+								children: [
+									{
+										element: <StructureRepairPartEditor />,
+										path: 'create'
+									},
+									{
+										element: <StructureRepairPartEditor />,
+										path: ':partId/edit'
+									}
+								],
+								element: <StructureRepairPartsList />,
+								path: ':repairId/parts'
+							}
+						],
+						element: <StructureRepairsList />,
+						path: ':structureId/repairs'
+					}
+				],
+				element: <StructuresList />,
+				path: '/structures'
+			},
+			{
+				children: [
+					{
+						element: <EquipmentEditor />,
+						path: 'create'
+					},
+					{
+						element: <EquipmentEditor />,
+						path: ':equipmentId/edit'
+					},
+					{
+						children: [
+							{
+								element: <EquipmentRepairEditor />,
+								path: 'create'
+							},
+							{
+								element: <EquipmentRepairEditor />,
+								path: ':repairId/edit'
+							},
+							{
+								children: [
+									{
+										element: <EquipmentRepairPartEditor />,
+										path: 'create'
+									},
+									{
+										element: <EquipmentRepairPartEditor />,
+										path: ':partId/edit'
+									}
+								],
+								element: <EquipmentRepairPartsList />,
+								path: ':repairId/parts'
+							}
+						],
+						element: <EquipmentRepairsList />,
+						path: ':equipmentId/repairs'
+					}
+				],
+				element: <EquipmentList />,
+				path: '/equipment'
+			},
 			{
 				element: (
 					<ProtectedRoute>
