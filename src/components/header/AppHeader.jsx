@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import AppBar from '@mui/material/AppBar';
+import ConstructionIcon from '@mui/icons-material/Construction';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -19,13 +20,13 @@ const AppHeader = () => {
 
 	return (
 		<AppBar position="static" sx={{ backgroundColor: 'rgb(7, 30,60)' }}>
-			<Toolbar>
+			<Toolbar sx={{ display: 'flex' }}>
 				<Typography
 					variant="h6"
 					component="div"
 					sx={{ cursor: 'pointer', flexGrow: 1 }}
 					onClick={() => navigate('/')} >
-					iFixedIt
+					<ConstructionIcon sx={{ fontSize: 28, mr: 1 }} />iFixedIt
 				</Typography>
 				<NavMenu />
 				<Button
