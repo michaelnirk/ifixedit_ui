@@ -1,11 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 const NotesFieldset = ({ children, onAddNote }) => {
 	return (

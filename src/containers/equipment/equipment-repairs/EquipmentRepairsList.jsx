@@ -25,6 +25,8 @@ const repairsListColumns = [
 	'Repair Cost'
 ];
 
+const zeroStateLabel = 'No repairs available. Please add a repair to get started.';
+
 const EquipmentRepairsList = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
@@ -118,7 +120,10 @@ const EquipmentRepairsList = () => {
 						addButtonText="Add Repair"
 						addButtonAction={() => navigate('create')}
 						titleText={pageTitle} />
-					<DataTable columnLabels={repairsListColumns} rows={tableRows} />
+					<DataTable
+						columnLabels={repairsListColumns}
+						rows={tableRows}
+						zeroStateLabel={zeroStateLabel} />
 				</PageLayout>
 			</>
 		)

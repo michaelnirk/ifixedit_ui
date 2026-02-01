@@ -28,6 +28,8 @@ const repairPartsListColumns = [
 	'Date Purchased'
 ];
 
+const zeroStateLabel = 'No repair parts available. Please add a repair part to get started.';
+
 const StructureRepairPartsList = () => {
 	const dispatch = useDispatch();
 	const confirm = useConfirm();
@@ -115,7 +117,10 @@ const StructureRepairPartsList = () => {
 						addButtonText="Add Repair Part"
 						addButtonAction={() => navigate('create')}
 						titleText="Repair Parts" />
-					<DataTable columnLabels={repairPartsListColumns} rows={tableRows} />
+					<DataTable
+						columnLabels={repairPartsListColumns}
+						rows={tableRows}
+						zeroStateLabel={zeroStateLabel} />
 				</PageLayout>
 			</>
 		)

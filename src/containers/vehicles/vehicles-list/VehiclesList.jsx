@@ -30,6 +30,8 @@ const vehicleListColumns = [
 	'Key Code'
 ];
 
+const zeroStateLabel = 'No vehicles available. Please add a vehicle to get started.';
+
 const VehiclesList = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
@@ -116,7 +118,10 @@ const VehiclesList = () => {
 						addButtonAction={() => navigate('create')}
 						additionalContent={showArchivedButton}
 						titleText="Vehicles" />
-					<DataTable columnLabels={vehicleListColumns} rows={tableRows} />
+					<DataTable
+						columnLabels={vehicleListColumns}
+						rows={tableRows}
+						zeroStateLabel={zeroStateLabel} />
 				</PageLayout>
 			</>
 		)

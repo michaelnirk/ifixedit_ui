@@ -24,6 +24,8 @@ const equipmentListColumns = [
 	'Cost'
 ];
 
+const zeroStateLabel = 'No equipment available. Please add a piece of equipment to get started.';
+
 const EquipmentList = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
@@ -110,7 +112,10 @@ const EquipmentList = () => {
 						addButtonAction={() => navigate('create')}
 						additionalContent={showArchivedButton}
 						titleText="Equipment" />
-					<DataTable columnLabels={equipmentListColumns} rows={tableRows} />
+					<DataTable
+						columnLabels={equipmentListColumns}
+						rows={tableRows}
+						zeroStateLabel={zeroStateLabel} />
 				</PageLayout>
 			</>
 		)

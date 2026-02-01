@@ -2,7 +2,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet, useParams } from 'react-router-dom';
 import { showNotification } from '@/state/features/notificationSlice';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
@@ -27,6 +26,8 @@ const repairPartsListColumns = [
 	'Quantity',
 	'Date Purchased'
 ];
+
+const zeroStateLabel = 'No repair parts available. Please add a repair part to get started.';
 
 const EquipmentRepairPartsList = () => {
 	const dispatch = useDispatch();
@@ -115,7 +116,10 @@ const EquipmentRepairPartsList = () => {
 						addButtonText="Add Repair Part"
 						addButtonAction={() => navigate('create')}
 						titleText="Repair Parts" />
-					<DataTable columnLabels={repairPartsListColumns} rows={tableRows} />
+					<DataTable
+						columnLabels={repairPartsListColumns}
+						rows={tableRows}
+						zeroStateLabel={zeroStateLabel} />
 				</PageLayout>
 			</>
 		)

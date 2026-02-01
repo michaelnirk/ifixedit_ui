@@ -26,6 +26,8 @@ const structureListColumns = [
 	'Cost'
 ];
 
+const zeroStateLabel = 'No structures available. Please add a structure to get started.';
+
 const StructuresList = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
@@ -117,7 +119,10 @@ const StructuresList = () => {
 						addButtonAction={() => navigate('create')}
 						additionalContent={showArchivedButton}
 						titleText="Structures" />
-					<DataTable columnLabels={structureListColumns} rows={tableRows} />
+					<DataTable
+						columnLabels={structureListColumns}
+						rows={tableRows}
+						zeroStateLabel={zeroStateLabel} />
 				</PageLayout>
 			</>
 		)

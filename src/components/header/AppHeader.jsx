@@ -1,20 +1,30 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
 import NavMenu from '@/components/NavMenu.jsx';
+import { useDispatch } from 'react-redux';
+import { logout } from '@/state/features/authSlice';
 
 const AppHeader = () => {
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
+	const onLogout = useCallback(() => {
+		// Implement logout logic here
+		dispatch(logout());
+		navigate('/login');
+	}, [dispatch, navigate]);
+
 	return (
 		<AppBar position="static" sx={{ backgroundColor: 'rgb(7, 30,60)' }}>
 			<Toolbar>
 				<Typography
 					variant="h6"
 					component="div"
-					sx={{ flexGrow: 1 }}>
+					sx={{ cursor: 'pointer', flexGrow: 1 }}
+					onClick={() => navigate('/')} >
 					iFixedIt
 				</Typography>
 				<NavMenu />
@@ -36,7 +46,7 @@ const AppHeader = () => {
 						'&:hover': { color: '#ffffff' },
 						color: 'rgb(206, 212, 218)' }
 					}
-					onClick={() => navigate('/about')}>About
+					onClick={onLogout}>Logout
 				</Button>
 			</Toolbar>
 		</AppBar>

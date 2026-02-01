@@ -4,7 +4,6 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
-import Notification from '@/components/Notification.jsx';
 import VehicleRepairRow from '@/components/table/VehicleRepairRow';
 import { showNotification } from '@/state/features/notificationSlice';
 import {
@@ -26,6 +25,8 @@ const repairsListColumns = [
 	'Mileage at Repair',
 	'Repair Cost'
 ];
+
+const zeroStateLabel = 'No repairs available. Please add a repair to get started.';
 
 const VehicleRepairsList = () => {
 	const dispatch = useDispatch();
@@ -122,7 +123,10 @@ const VehicleRepairsList = () => {
 						addButtonText="Add Repair"
 						addButtonAction={() => navigate('create')}
 						titleText={pageTitle} />
-					<DataTable columnLabels={repairsListColumns} rows={tableRows} />
+					<DataTable
+						columnLabels={repairsListColumns}
+						rows={tableRows}
+						zeroStateLabel={zeroStateLabel} />
 				</PageLayout>
 			</>
 		)

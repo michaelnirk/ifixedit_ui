@@ -2,7 +2,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet, useParams } from 'react-router-dom';
 import { showNotification } from '@/state/features/notificationSlice';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
@@ -25,6 +24,8 @@ const repairsListColumns = [
 	'Repair Performed By',
 	'Repair Cost'
 ];
+
+const zeroStateLabel = 'No repairs available. Please add a repair to get started.';
 
 const StructureRepairsList = () => {
 	const dispatch = useDispatch();
@@ -119,7 +120,10 @@ const StructureRepairsList = () => {
 						addButtonText="Add Repair"
 						addButtonAction={() => navigate('create')}
 						titleText={pageTitle} />
-					<DataTable columnLabels={repairsListColumns} rows={tableRows} />
+					<DataTable
+						columnLabels={repairsListColumns}
+						rows={tableRows}
+						zeroStateLabel={zeroStateLabel} />
 				</PageLayout>
 			</>
 		)

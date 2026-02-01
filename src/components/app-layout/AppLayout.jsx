@@ -1,7 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import AppHeader from '@/components/header/AppHeader';
-import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import RouterBreadcrumbs from '@/components/RouterBreadcrumbs.jsx';
 import Notification from '@/components/Notification.jsx';

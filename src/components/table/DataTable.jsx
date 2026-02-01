@@ -1,22 +1,14 @@
-import {
-	Box,
-	Button,
-	Typography,
-	CircularProgress,
-	Alert,
-	IconButton,
-	TableCell,
-	TableRow
-} from '@mui/material';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const DataTable = ({ columnLabels, rows }) => {
+const DataTable = ({ columnLabels, rows, zeroStateLabel }) => {
 	return (
 		<TableContainer
 			component={Paper}
@@ -44,7 +36,7 @@ const DataTable = ({ columnLabels, rows }) => {
 						rows.length === 0 ? (
 							<TableRow>
 								<TableCell colSpan={columnLabels.length + 1} align="center">
-									No data available
+									{zeroStateLabel}
 								</TableCell>
 							</TableRow>
 						) : (
@@ -59,7 +51,8 @@ const DataTable = ({ columnLabels, rows }) => {
 
 DataTable.propTypes = {
 	columnLabels: PropTypes.arrayOf(PropTypes.string).isRequired,
-	rows: PropTypes.arrayOf(PropTypes.element).isRequired
+	rows: PropTypes.arrayOf(PropTypes.element).isRequired,
+	zeroStateLabel: PropTypes.string.isRequired
 };
 
 export default DataTable;
