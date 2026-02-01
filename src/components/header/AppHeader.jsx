@@ -20,11 +20,11 @@ const AppHeader = () => {
 
 	return (
 		<AppBar position="static" sx={{ backgroundColor: 'rgb(7, 30,60)' }}>
-			<Toolbar sx={{ display: 'flex' }}>
+			<Toolbar>
 				<Typography
 					variant="h6"
 					component="div"
-					sx={{ cursor: 'pointer', flexGrow: 1 }}
+					sx={{ cursor: 'pointer', display: 'flex', flexGrow: 1 }}
 					onClick={() => navigate('/')} >
 					<ConstructionIcon sx={{ fontSize: 28, mr: 1 }} />iFixedIt
 				</Typography>
