@@ -186,6 +186,7 @@ const StructureRepairPartEditor = () => {
 											<TextField
 												{...field}
 												sx={{ flex: 12 }}
+												autoFocus
 												margin="normal"
 												label="Part Description *"
 												size="small"

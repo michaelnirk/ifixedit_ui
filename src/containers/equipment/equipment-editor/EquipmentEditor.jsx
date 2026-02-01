@@ -212,7 +212,6 @@ const EquipmentEditor = () => {
 											({ field }) => (
 												<TextField
 													{...field}
-													autoFocus
 													style={{ flex: 12 }}
 													margin="normal"
 													label="Description *"

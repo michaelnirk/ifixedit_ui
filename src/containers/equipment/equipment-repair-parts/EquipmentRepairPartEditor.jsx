@@ -185,6 +185,7 @@ const EquipmentRepairPartEditor = () => {
 										({ field }) => (
 											<TextField
 												{...field}
+												autoFocus
 												sx={{ flex: 12 }}
 												margin="normal"
 												label="Part Description *"
