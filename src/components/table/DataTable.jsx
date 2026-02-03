@@ -7,8 +7,9 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import React from 'react';
 import PropTypes from 'prop-types';
+import TableSortLabel from '@mui/material/TableSortLabel';
 
-const DataTable = ({ columnLabels, rows, zeroStateLabel }) => {
+const DataTable = ({ fields, rows, zeroStateLabel, sortedBy, onSortChange }) => {
 	return (
 		<TableContainer
 			component={Paper}
@@ -22,9 +23,16 @@ const DataTable = ({ columnLabels, rows, zeroStateLabel }) => {
 				<TableHead>
 					<TableRow>
 						{
-							columnLabels.map((label) => (
-								<TableCell key={label} sx={{ fontWeight: 'bold' }}>
-									{label}
+							fields.map((field) => (
+								<TableCell key={field.key} sx={{ fontWeight: 'bold' }}>
+									{
+										field.sortable ?
+											<TableSortLabel
+												active={field.key === sortedBy.field}
+												direction={field.key === sortedBy.field ? sortedBy.direction : 'asc'}
+												onClick={() => onSortChange(field.key)}>{field.label}
+											</TableSortLabel> : field.label
+									}
 								</TableCell>
 							))
 						}
@@ -35,7 +43,7 @@ const DataTable = ({ columnLabels, rows, zeroStateLabel }) => {
 					{
 						rows.length === 0 ? (
 							<TableRow>
-								<TableCell colSpan={columnLabels.length + 1} align="center">
+								<TableCell colSpan={fields.length + 1} align="center">
 									{zeroStateLabel}
 								</TableCell>
 							</TableRow>
@@ -50,8 +58,13 @@ const DataTable = ({ columnLabels, rows, zeroStateLabel }) => {
 };
 
 DataTable.propTypes = {
-	columnLabels: PropTypes.arrayOf(PropTypes.string).isRequired,
+	fields: PropTypes.arrayOf(PropTypes.object).isRequired,
+	onSortChange: PropTypes.func,
 	rows: PropTypes.arrayOf(PropTypes.element).isRequired,
+	sortedBy: PropTypes.shape({
+		direction: PropTypes.oneOf(['asc', 'desc']).isRequired,
+		field: PropTypes.string.isRequired
+	}).isRequired,
 	zeroStateLabel: PropTypes.string.isRequired
 };
 

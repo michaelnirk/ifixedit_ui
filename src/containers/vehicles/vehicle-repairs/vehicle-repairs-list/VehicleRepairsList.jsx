@@ -17,13 +17,35 @@ import PageLayout from '@/components/PageLayout.jsx';
 import { selectUserId } from '@/state/features/authSlice';
 import React, { useMemo, useCallback } from 'react';
 import { useConfirm } from 'material-ui-confirm';
+import { selectSortedVehicleRepairsData } from './selectors';
+import { selectSortedBy, setSortedBy } from './slice';
 
-const repairsListColumns = [
-	'Repair Description',
-	'Repair Date',
-	'Repair Location',
-	'Mileage at Repair',
-	'Repair Cost'
+const fields = [
+	{
+		key: 'description',
+		label: 'Repair Description',
+		sortable: true
+	},
+	{
+		key: 'repair_date',
+		label: 'Repair Date',
+		sortable: true
+	},
+	{
+		key: 'repair_location',
+		label: 'Repair Location',
+		sortable: true
+	},
+	{
+		key: 'mileage_at_repair',
+		label: 'Mileage at Repair',
+		sortable: true
+	},
+	{
+		key: 'repair_cost',
+		label: 'Repair Cost',
+		sortable: true
+	}
 ];
 
 const zeroStateLabel = 'No repairs available. Please add a repair to get started.';
@@ -33,10 +55,14 @@ const VehicleRepairsList = () => {
 	const navigate = useNavigate();
 	const { vehicleId } = useParams();
 	const userId = useSelector(selectUserId);
+
+	const selectRepairs = useMemo(() => selectSortedVehicleRepairsData(vehicleId), [vehicleId]);
+	const repairsData = useSelector(selectRepairs);
+	const sortedBy = useSelector(selectSortedBy);
 	const confirm = useConfirm();
 
 	// RTK Query hooks
-	const { data: repairsData = [], isLoading, isError: isRepairsError } = useListRepairsQuery({ entityId: vehicleId, userId }, {
+	const { isLoading, isError: isRepairsError } = useListRepairsQuery({ entityId: vehicleId, userId }, {
 		skip: !userId || !vehicleId // Skip if no user ID or vehicle ID
 	});
 
@@ -47,6 +73,14 @@ const VehicleRepairsList = () => {
 	const { data: vehicleData } = useGetVehicleQuery({ userId, vehicleId }, {
 		skip: !userId || !vehicleId
 	});
+
+	const onSortChange = useCallback((field) => {
+		let direction = 'asc';
+		if (sortedBy.field === field && sortedBy.direction === 'asc') {
+			direction = 'desc';
+		}
+		dispatch(setSortedBy({ direction, field }));
+	}, [dispatch, sortedBy]);
 
 	const [deleteRepair] = useDeleteRepairMutation();
 	const onDeleteRepair = useCallback(async (repairId) => {
@@ -124,7 +158,9 @@ const VehicleRepairsList = () => {
 						addButtonAction={() => navigate('create')}
 						titleText={pageTitle} />
 					<DataTable
-						columnLabels={repairsListColumns}
+						fields={fields}
+						onSortChange={onSortChange}
+						sortedBy={sortedBy}
 						rows={tableRows}
 						zeroStateLabel={zeroStateLabel} />
 				</PageLayout>

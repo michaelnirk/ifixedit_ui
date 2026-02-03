@@ -1,14 +1,13 @@
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Outlet, useParams } from 'react-router-dom';
-import { showNotification } from '@/state/features/notificationSlice';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
 import RepairPartRow from '@/components/table/RepairPartRow';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
+import { showNotification } from '@/state/features/notificationSlice';
 import {
 	useListRepairPartsQuery,
 	useDeleteRepairPartMutation,
@@ -17,34 +16,76 @@ import {
 import { selectUserId } from '@/state/features/authSlice';
 import React, { useMemo, useCallback } from 'react';
 import { useConfirm } from 'material-ui-confirm';
+import { selectSortedVehicleRepairPartsData } from './selectors';
+import { selectSortedBy, setSortedBy } from './slice';
 
-const repairPartsListColumns = [
-	'Part Description',
-	'Part Number',
-	'Source',
-	'Brand',
-	'Cost',
-	'Quantity',
-	'Date Purchased'
+const fields = [
+	{
+		key: 'part_description',
+		label: 'Part Description',
+		sortable: true
+	},
+	{
+		key: 'part_number',
+		label: 'Part Number',
+		sortable: true
+	},
+	{
+		key: 'source',
+		label: 'Source',
+		sortable: true
+	},
+	{
+		key: 'brand',
+		label: 'Brand',
+		sortable: true
+	},
+	{
+		key: 'cost',
+		label: 'Cost',
+		sortable: true
+	},
+	{
+		key: 'quantity',
+		label: 'Quantity',
+		sortable: true
+	},
+	{
+		key: 'date_purchased',
+		label: 'Date Purchased',
+		sortable: true
+	}
 ];
 
 const zeroStateLabel = 'No repair parts available. Please add a repair part to get started.';
 
-const StructureRepairPartsList = () => {
-	const dispatch = useDispatch();
+const VehicleRepairPartsList = () => {
 	const confirm = useConfirm();
+	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const { repairId } = useParams();
 	const userId = useSelector(selectUserId);
 
+	const selectRepairParts = useMemo(() => selectSortedVehicleRepairPartsData(repairId), [repairId]);
+	const repairPartsData = useSelector(selectRepairParts);
+	const sortedBy = useSelector(selectSortedBy);
+
 	// RTK Query hooks
-	const { data: repairPartsData = [], isLoading, isError: isRepairPartsError } = useListRepairPartsQuery({ repairId, userId }, {
+	const { isLoading, isError: isRepairPartsError } = useListRepairPartsQuery({ repairId, userId }, {
 		skip: !userId || !repairId // Skip if no user ID or repair ID
 	});
 
 	const { data: currencies = [], isError: isCurrenciesError, isLoading: currenciesLoading } = useListCurrenciesQuery(userId, {
 		skip: !userId
 	});
+
+	const onSortChange = useCallback((field) => {
+		let direction = 'asc';
+		if (sortedBy.field === field && sortedBy.direction === 'asc') {
+			direction = 'desc';
+		}
+		dispatch(setSortedBy({ direction, field }));
+	}, [dispatch, sortedBy]);
 
 	const [deleteRepairPart] = useDeleteRepairPartMutation();
 	const onDeleteRepairPart = useCallback(async (partId) => {
@@ -58,12 +99,6 @@ const StructureRepairPartsList = () => {
 		if (confirmed) {
 			try {
 				await deleteRepairPart({ partId, userId }).unwrap();
-				dispatch(showNotification({
-					alertVariant: 'filled',
-					autoCloseDuration: 3000,
-					message: 'Repair part deleted successfully',
-					severity: 'success'
-				}));
 			} catch {
 				dispatch(showNotification({
 					alertVariant: 'filled',
@@ -71,8 +106,14 @@ const StructureRepairPartsList = () => {
 					severity: 'error'
 				}));
 			}
+			dispatch(showNotification({
+				alertVariant: 'filled',
+				autoCloseDuration: 3000,
+				message: 'Repair part deleted successfully',
+				severity: 'success'
+			}));
 		}
-	}, [confirm, deleteRepairPart, userId, dispatch]);
+	}, [confirm, deleteRepairPart, dispatch, userId]);
 
 	const tableRows = useMemo(() => {
 		return repairPartsData.map((part) => (
@@ -92,11 +133,9 @@ const StructureRepairPartsList = () => {
 
 	if (isLoading || currenciesLoading) {
 		return (
-			<>
-				<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
-					<CircularProgress />
-				</Box>
-			</>
+			<Box sx={{ alignItems: 'center', display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
+				<CircularProgress />
+			</Box>
 		);
 	}
 
@@ -118,7 +157,9 @@ const StructureRepairPartsList = () => {
 						addButtonAction={() => navigate('create')}
 						titleText="Repair Parts" />
 					<DataTable
-						columnLabels={repairPartsListColumns}
+						fields={fields}
+						onSortChange={onSortChange}
+						sortedBy={sortedBy}
 						rows={tableRows}
 						zeroStateLabel={zeroStateLabel} />
 				</PageLayout>
@@ -127,4 +168,4 @@ const StructureRepairPartsList = () => {
 	);
 };
 
-export default StructureRepairPartsList;
+export default VehicleRepairPartsList;

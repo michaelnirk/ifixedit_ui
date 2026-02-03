@@ -11,19 +11,39 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import { useListAcquisitionMethodsQuery, useListCurrenciesQuery, useListStructuresQuery } from '@/state/api/rootApi';
 import { selectUserId } from '@/state/features/authSlice';
-import { selectArchivedFilteredStructures } from '@/containers/structures/structures-list/selectors';
+import { selectSortedStructureData } from '@/containers/structures/structures-list/selectors';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
-import { selectShowArchived, setShowArchived } from './slice';
+import { selectShowArchived, setShowArchived, selectSortedBy, setSortedBy } from './slice';
 import { showNotification } from '@/state/features/notificationSlice';
 import React, { useMemo, useCallback } from 'react';
 
-const structureListColumns = [
-	'Name',
-	'Description',
-	'How Acquired',
-	'Acquisition Date',
-	'Cost'
+const fields = [
+	{
+		key: 'name',
+		label: 'Name',
+		sortable: true
+	},
+	{
+		key: 'description',
+		label: 'Description',
+		sortable: true
+	},
+	{
+		key: 'how_acquired',
+		label: 'How Acquired',
+		sortable: true
+	},
+	{
+		key: 'acquisition_date',
+		label: 'Acquisition Date',
+		sortable: true
+	},
+	{
+		key: 'cost',
+		label: 'Cost',
+		sortable: true
+	}
 ];
 
 const zeroStateLabel = 'No structures available. Please add a structure to get started.';
@@ -32,8 +52,9 @@ const StructuresList = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const userId = useSelector(selectUserId);
-	const structures = useSelector(selectArchivedFilteredStructures);
+	const structures = useSelector(selectSortedStructureData);
 	const showArchived = useSelector(selectShowArchived);
+	const sortedBy = useSelector(selectSortedBy);
 
 	// RTK Query hooks
 	const { isLoading, isError: isStructuresError } = useListStructuresQuery(userId, {
@@ -55,6 +76,14 @@ const StructuresList = () => {
 	const onShowRepairs = useCallback((structureId) => {
 		navigate(`${structureId}/repairs`);
 	}, [navigate]);
+
+	const onSortChange = useCallback((field) => {
+		let direction = 'asc';
+		if (sortedBy.field === field && sortedBy.direction === 'asc') {
+			direction = 'desc';
+		}
+		dispatch(setSortedBy({ direction, field }));
+	}, [dispatch, sortedBy]);
 
 	const tableRows = useMemo(() => {
 		return structures.map((structure) => (
@@ -120,9 +149,11 @@ const StructuresList = () => {
 						additionalContent={showArchivedButton}
 						titleText="Structures" />
 					<DataTable
-						columnLabels={structureListColumns}
+						fields={fields}
 						rows={tableRows}
-						zeroStateLabel={zeroStateLabel} />
+						zeroStateLabel={zeroStateLabel}
+						sortedBy={sortedBy}
+						onSortChange={onSortChange} />
 				</PageLayout>
 			</>
 		)

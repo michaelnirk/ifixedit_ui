@@ -1,7 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { rootApi } from '@/state/api/rootApi';
-import { selectShowArchived } from '@/containers/equipment/equipment-list/slice';
+import { selectShowArchived, selectSortedBy } from '@/containers/equipment/equipment-list/slice';
 import { selectUserId } from '@/state/features/authSlice';
+import { sortItems } from '@/utils/sort';
 
 const selectEquipmentData = createSelector(
 	[
@@ -27,5 +28,13 @@ export const selectArchivedFilteredEquipment = createSelector(
 			return equipment;
 		}
 		return equipment.filter((item) => !item.archived);
+	}
+);
+
+export const selectSortedEquipmentData = createSelector(
+	selectArchivedFilteredEquipment,
+	selectSortedBy,
+	(equipment, sortedBy) => {
+		return sortItems(equipment, sortedBy);
 	}
 );

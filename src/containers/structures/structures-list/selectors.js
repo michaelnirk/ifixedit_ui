@@ -1,7 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { rootApi } from '@/state/api/rootApi';
-import { selectShowArchived } from '@/containers/vehicles/vehicles-list/slice';
+import { selectShowArchived, selectSortedBy } from '@/containers/structures/structures-list/slice';
 import { selectUserId } from '@/state/features/authSlice';
+import { sortItems } from '@/utils/sort';
 
 const selectStructuresData = createSelector(
 	[
@@ -27,5 +28,13 @@ export const selectArchivedFilteredStructures = createSelector(
 			return structures;
 		}
 		return structures.filter((structure) => !structure.archived);
+	}
+);
+
+export const selectSortedStructureData = createSelector(
+	selectArchivedFilteredStructures,
+	selectSortedBy,
+	(structures, sortedBy) => {
+		return sortItems(structures, sortedBy);
 	}
 );

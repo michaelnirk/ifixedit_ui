@@ -11,17 +11,33 @@ import { showNotification } from '@/state/features/notificationSlice';
 import Switch from '@mui/material/Switch';
 import { useListCurrenciesQuery, useListEquipmentQuery } from '@/state/api/rootApi';
 import { selectUserId } from '@/state/features/authSlice';
-import { selectArchivedFilteredEquipment } from '@/containers/equipment/equipment-list/selectors';
+import { selectSortedEquipmentData } from '@/containers/equipment/equipment-list/selectors';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
-import { selectShowArchived, setShowArchived } from './slice';
+import { selectShowArchived, setShowArchived, selectSortedBy, setSortedBy } from './slice';
 import React, { useMemo, useCallback } from 'react';
 
-const equipmentListColumns = [
-	'Name',
-	'Description',
-	'Acquisition Date',
-	'Cost'
+const fields = [
+	{
+		key: 'name',
+		label: 'Name',
+		sortable: true
+	},
+	{
+		key: 'description',
+		label: 'Description',
+		sortable: true
+	},
+	{
+		key: 'acquisition_date',
+		label: 'Acquisition Date',
+		sortable: true
+	},
+	{
+		key: 'cost',
+		label: 'Cost',
+		sortable: true
+	}
 ];
 
 const zeroStateLabel = 'No equipment available. Please add a piece of equipment to get started.';
@@ -30,8 +46,9 @@ const EquipmentList = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const userId = useSelector(selectUserId);
-	const equipment = useSelector(selectArchivedFilteredEquipment);
+	const equipment = useSelector(selectSortedEquipmentData);
 	const showArchived = useSelector(selectShowArchived);
+	const sortedBy = useSelector(selectSortedBy);
 
 	// RTK Query hooks
 	const { isLoading, isError: isEquipmentError } = useListEquipmentQuery(userId, {
@@ -49,6 +66,14 @@ const EquipmentList = () => {
 	const onShowRepairs = useCallback((equipmentId) => {
 		navigate(`${equipmentId}/repairs`);
 	}, [navigate]);
+
+	const onSortChange = useCallback((field) => {
+		let direction = 'asc';
+		if (sortedBy.field === field && sortedBy.direction === 'asc') {
+			direction = 'desc';
+		}
+		dispatch(setSortedBy({ direction, field }));
+	}, [dispatch, sortedBy]);
 
 	const tableRows = useMemo(() => {
 		return equipment.map((equipmentItem) => (
@@ -113,9 +138,11 @@ const EquipmentList = () => {
 						additionalContent={showArchivedButton}
 						titleText="Equipment" />
 					<DataTable
-						columnLabels={equipmentListColumns}
+						fields={fields}
 						rows={tableRows}
-						zeroStateLabel={zeroStateLabel} />
+						zeroStateLabel={zeroStateLabel}
+						sortedBy={sortedBy}
+						onSortChange={onSortChange} />
 				</PageLayout>
 			</>
 		)

@@ -11,23 +11,63 @@ import { showNotification } from '@/state/features/notificationSlice';
 import Switch from '@mui/material/Switch';
 import { useListCurrenciesQuery, useListVehiclesQuery } from '@/state/api/rootApi';
 import { selectUserId } from '@/state/features/authSlice';
-import { selectArchivedFilteredVehicles } from '@/containers/vehicles/vehicles-list/selectors';
+import { selectSortedVehicleData } from '@/containers/vehicles/vehicles-list/selectors';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
-import { selectShowArchived, setShowArchived } from './slice';
+import { selectShowArchived, setShowArchived, selectSortedBy, setSortedBy } from './slice';
 import React, { useMemo, useCallback } from 'react';
 
-const vehicleListColumns = [
-	'Name',
-	'Year',
-	'Make',
-	'Model',
-	'Date Purchased',
-	'Mileage at Purchase',
-	'Purchase Price',
-	'VIN',
-	'License Plate',
-	'Key Code'
+const fields = [
+	{
+		key: 'name',
+		label: 'Name',
+		sortable: true
+	},
+	{
+		key: 'year',
+		label: 'Year',
+		sortable: true
+	},
+	{
+		key: 'make',
+		label: 'Make',
+		sortable: true
+	},
+	{
+		key: 'model',
+		label: 'Model',
+		sortable: true
+	},
+	{
+		key: 'date_purchased',
+		label: 'Date Purchased',
+		sortable: true
+	},
+	{
+		key: 'mileage_at_purchase',
+		label: 'Mileage at Purchase',
+		sortable: true
+	},
+	{
+		key: 'purchase_price',
+		label: 'Purchase Price',
+		sortable: true
+	},
+	{
+		key: 'vin',
+		label: 'VIN',
+		sortable: false
+	},
+	{
+		key: 'license_plate',
+		label: 'License Plate',
+		sortable: false
+	},
+	{
+		key: 'key_code',
+		label: 'Key Code',
+		sortable: false
+	}
 ];
 
 const zeroStateLabel = 'No vehicles available. Please add a vehicle to get started.';
@@ -36,8 +76,9 @@ const VehiclesList = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const userId = useSelector(selectUserId);
-	const vehicles = useSelector(selectArchivedFilteredVehicles);
+	const vehicleData = useSelector(selectSortedVehicleData);
 	const showArchived = useSelector(selectShowArchived);
+	const sortedBy = useSelector(selectSortedBy);
 
 	// RTK Query hooks
 	const { isLoading, isError: isVehiclesError } = useListVehiclesQuery(userId, {
@@ -56,8 +97,16 @@ const VehiclesList = () => {
 		navigate(`${vehicleId}/repairs`);
 	}, [navigate]);
 
+	const onSortChange = useCallback((field) => {
+		let direction = 'asc';
+		if (sortedBy.field === field && sortedBy.direction === 'asc') {
+			direction = 'desc';
+		}
+		dispatch(setSortedBy({ direction, field }));
+	}, [dispatch, sortedBy]);
+
 	const tableRows = useMemo(() => {
-		return vehicles.map((vehicle) => (
+		return vehicleData.map((vehicle) => (
 			<VehicleRow
 				key={vehicle.vehicle_id}
 				vehicle={vehicle}
@@ -65,7 +114,7 @@ const VehiclesList = () => {
 				onEdit={(id) => onEdit(id)}
 				onShowRepairs={(id) => onShowRepairs(id)} />
 		));
-	}, [vehicles, currencies, onEdit, onShowRepairs]);
+	}, [vehicleData, currencies, onEdit, onShowRepairs]);
 
 	const showArchivedButton = useMemo(() => {
 		const onToggleArchived = () => {
@@ -119,8 +168,10 @@ const VehiclesList = () => {
 						additionalContent={showArchivedButton}
 						titleText="Vehicles" />
 					<DataTable
-						columnLabels={vehicleListColumns}
+						fields={fields}
+						onSortChange={onSortChange}
 						rows={tableRows}
+						sortedBy={sortedBy}
 						zeroStateLabel={zeroStateLabel} />
 				</PageLayout>
 			</>
