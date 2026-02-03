@@ -17,8 +17,8 @@ import PageLayout from '@/components/PageLayout.jsx';
 import { selectUserId } from '@/state/features/authSlice';
 import React, { useMemo, useCallback } from 'react';
 import { useConfirm } from 'material-ui-confirm';
-import { selectSortedStructureRepairsData } from './structure-repairs-list/selectors';
-import { selectSortedBy, setSortedBy } from './structure-repairs-list/slice';
+import { selectSortedStructureRepairsData } from './selectors';
+import { selectSortedBy, setSortedBy } from './slice';
 
 const fields = [
 	{

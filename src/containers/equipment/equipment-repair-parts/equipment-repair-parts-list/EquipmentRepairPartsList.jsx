@@ -16,8 +16,8 @@ import {
 import { selectUserId } from '@/state/features/authSlice';
 import React, { useMemo, useCallback } from 'react';
 import { useConfirm } from 'material-ui-confirm';
-import { selectSortedEquipmentRepairPartsData } from './equipment-repair-parts-list/selectors';
-import { selectSortedBy, setSortedBy } from './equipment-repair-parts-list/slice';
+import { selectSortedEquipmentRepairPartsData } from './selectors';
+import { selectSortedBy, setSortedBy } from './slice';
 
 const fields = [
 	{
