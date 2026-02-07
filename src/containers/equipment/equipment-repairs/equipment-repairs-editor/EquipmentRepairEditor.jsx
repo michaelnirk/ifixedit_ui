@@ -193,7 +193,7 @@ const EquipmentRepairEditor = () => {
 							</InputRow>
 							<InputRow>
 								<Controller
-									name="performed_by"
+									name="repair_location"
 									control={control}
 									render={
 										({ field }) => (
