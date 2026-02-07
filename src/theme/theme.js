@@ -12,6 +12,15 @@ const customTheme = createTheme({
 				}
 			}
 		},
+		MuiTableCell: {
+			styleOverrides: {
+				root: {
+					'&.MuiTableCell-body': {
+						padding: '8px 16px'
+					}
+				}
+			}
+		},
 		MuiTextField: {
 			styleOverrides: {
 				root: {
