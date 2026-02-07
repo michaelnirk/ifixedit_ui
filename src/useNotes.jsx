@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useFieldArray, Controller } from 'react-hook-form';
 import Note from '@/components/Note.jsx';
 import NotesFieldset from '@/components/NotesFieldset.jsx';
@@ -14,6 +14,8 @@ export function useNotes({ control, name = 'notes' }) {
 	const confirm = useConfirm();
 	const userId = useSelector(selectUserId);
 	const [deleteNote] = useDeleteNoteMutation();
+	const newNoteRef = useRef(null);
+	const shouldFocusNewNote = useRef(false);
 
 	const handleDeleteNote = async (index) => {
 		try {
@@ -47,8 +49,20 @@ export function useNotes({ control, name = 'notes' }) {
 		}
 	};
 
+	useEffect(() => {
+		if (shouldFocusNewNote.current && newNoteRef.current) {
+			newNoteRef.current.focus();
+			shouldFocusNewNote.current = false;
+		}
+	}, [fields.length]);
+
 	const NotesSection = (
-		<NotesFieldset onAddNote={() => append({ note_id: null, note_text: '' })}>
+		<NotesFieldset onAddNote={
+			() => {
+				shouldFocusNewNote.current = true;
+				append({ note_id: null, note_text: '' });
+			}
+		}>
 			{
 				fields.length === 0 ? (
 					<div style={{ color: '#888', fontStyle: 'italic', padding: '8px 0' }}>
@@ -64,6 +78,7 @@ export function useNotes({ control, name = 'notes' }) {
 							render={
 								({ field }) => (
 									<Note
+										ref={index === fields.length - 1 ? newNoteRef : null}
 										value={field.value}
 										onChange={field.onChange}
 										onDeleteNote={() => handleDeleteNote(index)} />

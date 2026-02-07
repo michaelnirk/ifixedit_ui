@@ -2,13 +2,14 @@ import TextareaAutosize from '@mui/material/TextareaAutosize';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import React from 'react';
+import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 
-const Note = ({ value, onChange, onDeleteNote }) => {
+const Note = forwardRef(({ value, onChange, onDeleteNote }, ref) => {
 	return (
 		<div style={{ position: 'relative' }}>
 			<TextareaAutosize
+				ref={ref}
 				minRows={3}
 				style={{ borderColor: 'rgb(204, 204, 204)', borderRadius: '4px', fontFamily: ('Roboto', 'Helvetica', 'Arial', 'sans-serif'), fontSize: '14px', padding: '8px 20px 8px 8px', width: '100%' }}
 				value={value}
@@ -33,7 +34,9 @@ const Note = ({ value, onChange, onDeleteNote }) => {
 			</Tooltip>
 		</div>
 	);
-};
+});
+
+Note.displayName = 'Note';
 
 Note.propTypes = {
 	onChange: PropTypes.func.isRequired,
