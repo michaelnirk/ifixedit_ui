@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 
-const StructureRepairRow = ({ repair, currencies = [], onEdit, onDeleteRepair, onShowParts }) => {
+const EquipmentRepairRow = ({ repair, currencies = [], onEdit, onDeleteRepair, onShowParts }) => {
 	const repairPrice = useMemo(() => {
 		if (!repair.repair_cost) {
 			return '';
@@ -68,7 +68,7 @@ const StructureRepairRow = ({ repair, currencies = [], onEdit, onDeleteRepair, o
 	);
 };
 
-StructureRepairRow.propTypes = {
+EquipmentRepairRow.propTypes = {
 	currencies: PropTypes.array,
 	onDeleteRepair: PropTypes.func.isRequired,
 	onEdit: PropTypes.func.isRequired,
@@ -76,4 +76,4 @@ StructureRepairRow.propTypes = {
 	repair: PropTypes.object.isRequired
 };
 
-export default StructureRepairRow;
+export default EquipmentRepairRow;

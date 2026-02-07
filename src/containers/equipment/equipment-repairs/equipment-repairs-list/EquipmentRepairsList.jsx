@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
-import VehicleRepairRow from '@/components/table/VehicleRepairRow';
+import EquipmentRepairRow from '@/components/table/EquipmentRepairRow';
 import {
 	useListRepairsQuery,
 	useDeleteRepairMutation,
@@ -32,7 +32,7 @@ const fields = [
 		sortable: true
 	},
 	{
-		key: 'repair_performed_by',
+		key: 'repair_location',
 		label: 'Repair Performed By',
 		sortable: true
 	},
@@ -107,7 +107,7 @@ const EquipmentRepairsList = () => {
 
 	const tableRows = useMemo(() => {
 		return repairsData.map((repair) => (
-			<VehicleRepairRow
+			<EquipmentRepairRow
 				key={repair.repair_id}
 				repair={repair}
 				currencies={currencies}

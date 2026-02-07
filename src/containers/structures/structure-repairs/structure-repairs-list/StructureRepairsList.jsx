@@ -32,7 +32,7 @@ const fields = [
 		sortable: true
 	},
 	{
-		key: 'repair_performed_by',
+		key: 'repair_location',
 		label: 'Repair Performed By',
 		sortable: true
 	},
