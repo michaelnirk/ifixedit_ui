@@ -11,7 +11,18 @@ const Note = forwardRef(({ value, onChange, onDeleteNote }, ref) => {
 			<TextareaAutosize
 				ref={ref}
 				minRows={3}
-				style={{ borderColor: 'rgb(204, 204, 204)', borderRadius: '4px', fontFamily: ('Roboto', 'Helvetica', 'Arial', 'sans-serif'), fontSize: '14px', padding: '8px 20px 8px 8px', width: '100%' }}
+				style={
+					{
+						backgroundColor: '#fff',
+						borderColor: 'rgb(204, 204, 204)',
+						borderRadius: '4px',
+						color: 'inherit',
+						fontFamily: ('Roboto', 'Helvetica', 'Arial', 'sans-serif'),
+						fontSize: '14px',
+						padding: '8px 20px 8px 8px',
+						width: '100%'
+					}
+				}
 				value={value}
 				onChange={onChange} />
 			<Tooltip
