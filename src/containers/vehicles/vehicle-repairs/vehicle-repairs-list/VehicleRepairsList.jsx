@@ -1,6 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Outlet, useParams } from 'react-router-dom';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Add from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
@@ -13,12 +15,13 @@ import {
 	useGetVehicleQuery
 } from '@/state/api/rootApi';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
+import SearchInput from '@/components/SearchInput';
 import PageLayout from '@/components/PageLayout.jsx';
 import { selectUserId } from '@/state/features/authSlice';
 import React, { useMemo, useCallback } from 'react';
 import { useConfirm } from 'material-ui-confirm';
 import { selectSortedVehicleRepairsData } from './selectors';
-import { selectSortedBy, setSortedBy } from './slice';
+import { selectSortedBy, setSortedBy, selectSearchTerm, setSearchTerm } from './slice';
 
 const fields = [
 	{
@@ -59,6 +62,7 @@ const VehicleRepairsList = () => {
 	const selectRepairs = useMemo(() => selectSortedVehicleRepairsData(vehicleId), [vehicleId]);
 	const repairsData = useSelector(selectRepairs);
 	const sortedBy = useSelector(selectSortedBy);
+	const searchTerm = useSelector(selectSearchTerm);
 	const confirm = useConfirm();
 
 	// RTK Query hooks
@@ -126,6 +130,22 @@ const VehicleRepairsList = () => {
 		return vehicleData ? `Repairs for ${vehicleData.name}` : 'Repairs';
 	}, [vehicleData]);
 
+	const headerContent = useMemo(() => (
+		<div style={{ alignItems: 'center', display: 'flex', gap: '16px' }}>
+			<SearchInput
+				placeholderText="Search repairs"
+				searchTerm={searchTerm}
+				onChange={(e) => dispatch(setSearchTerm(e.target.value))} />
+			<Button
+				sx={{ borderRadius: '25px' }}
+				variant="contained"
+				startIcon={<Add />}
+				onClick={() => navigate('create')}>
+				Add Repair
+			</Button>
+		</div>
+	), [searchTerm, dispatch, navigate]);
+
 	if (!userId || !vehicleId) {
 		return <Alert severity="warning">Please log in and select a vehicle to view repairs.</Alert>;
 	}
@@ -153,10 +173,9 @@ const VehicleRepairsList = () => {
 			<>
 				<Outlet />
 				<PageLayout>
-					<ListHeaderLayout
-						addButtonText="Add Repair"
-						addButtonAction={() => navigate('create')}
-						titleText={pageTitle} />
+					<ListHeaderLayout titleText={pageTitle}>
+						{headerContent}
+					</ListHeaderLayout>
 					<DataTable
 						fields={fields}
 						onSortChange={onSortChange}
