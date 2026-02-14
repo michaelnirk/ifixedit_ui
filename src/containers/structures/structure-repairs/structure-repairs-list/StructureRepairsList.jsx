@@ -125,6 +125,22 @@ const StructureRepairsList = () => {
 		return structureData ? `Repairs for ${structureData.name}` : 'Repairs';
 	}, [structureData]);
 
+	const headerContent = useMemo(() => (
+		<div style={{ alignItems: 'center', display: 'flex', gap: '16px' }}>
+			<SearchInput
+				placeholderText="Search repairs"
+				searchTerm={searchTerm}
+				onChange={(e) => dispatch(setSearchTerm(e.target.value))} />
+			<Button
+				sx={{ borderRadius: '25px' }}
+				variant="contained"
+				startIcon={<Add />}
+				onClick={() => navigate('create')}>
+				Add Repair
+			</Button>
+		</div>
+	), [searchTerm, dispatch, navigate]);
+
 	if (!userId || !structureId) {
 		return <Alert severity="warning">Please log in and select a structure to view repairs.</Alert>;
 	}
@@ -144,22 +160,6 @@ const StructureRepairsList = () => {
 			severity: 'error'
 		}));
 	}
-
-	const headerContent = useMemo(() => (
-		<div style={{ alignItems: 'center', display: 'flex', gap: '16px' }}>
-			<SearchInput
-				placeholderText="Search repairs"
-				searchTerm={searchTerm}
-				onChange={(e) => dispatch(setSearchTerm(e.target.value))} />
-			<Button
-				sx={{ borderRadius: '25px' }}
-				variant="contained"
-				startIcon={<Add />}
-				onClick={() => navigate('create')}>
-				Add Repair
-			</Button>
-		</div>
-	), [searchTerm, dispatch, navigate]);
 
 	return (
 		!isRepairsError && !isCurrenciesError && !isStructureError && (
