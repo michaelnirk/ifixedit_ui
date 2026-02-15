@@ -18,7 +18,7 @@ import {
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
 import { selectUserId } from '@/state/features/authSlice';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { useConfirm } from 'material-ui-confirm';
 import { selectSortedStructureRepairsData } from './selectors';
 import { selectSearchTerm, selectSortedBy, setSearchTerm, setSortedBy } from './slice';
@@ -59,6 +59,13 @@ const StructureRepairsList = () => {
 	const sortedBy = useSelector(selectSortedBy);
 	const searchTerm = useSelector(selectSearchTerm);
 	const confirm = useConfirm();
+
+	useEffect(() => {
+		return () => {
+			dispatch(setSearchTerm(''));
+			dispatch(setSortedBy({ direction: 'desc', field: 'repair_date' }));
+		};
+	}, []);
 
 	// RTK Query hooks
 	const { isLoading, isError: isRepairsError } = useListRepairsQuery({ entityId: structureId, userId }, {
