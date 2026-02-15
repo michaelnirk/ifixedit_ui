@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet } from 'react-router-dom';
+import { Add } from '@mui/icons-material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -85,6 +86,16 @@ const StructuresList = () => {
 		dispatch(setSortedBy({ direction, field }));
 	}, [dispatch, sortedBy]);
 
+	const headerContent = useMemo(() => (
+		<Button
+			sx={{ borderRadius: '25px' }}
+			variant="contained"
+			startIcon={<Add />}
+			onClick={() => navigate('create')}>
+			Add Structure
+		</Button>
+	), [navigate]);
+
 	const tableRows = useMemo(() => {
 		return structures.map((structure) => (
 			<StructureRow
@@ -144,10 +155,10 @@ const StructuresList = () => {
 				<Outlet />
 				<PageLayout>
 					<ListHeaderLayout
-						addButtonText="Add Structure"
-						addButtonAction={() => navigate('create')}
 						additionalContent={showArchivedButton}
-						titleText="Structures" />
+						titleText="Structures">
+						{headerContent}
+					</ListHeaderLayout>
 					<DataTable
 						fields={fields}
 						rows={tableRows}

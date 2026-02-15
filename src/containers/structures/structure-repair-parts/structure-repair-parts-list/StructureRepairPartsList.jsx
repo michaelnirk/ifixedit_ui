@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet, useParams } from 'react-router-dom';
 import { showNotification } from '@/state/features/notificationSlice';
+import Add from '@mui/icons-material/Add';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -116,6 +117,16 @@ const StructureRepairPartsList = () => {
 		}
 	}, [confirm, deleteRepairPart, userId, dispatch]);
 
+	const headerContent = useMemo(() => (
+		<Button
+			sx={{ borderRadius: '25px' }}
+			variant="contained"
+			startIcon={<Add />}
+			onClick={() => navigate('create')}>
+			Add Repair Part
+		</Button>
+	), [navigate]);
+
 	const tableRows = useMemo(() => {
 		return repairPartsData.map((part) => (
 			<RepairPartRow
@@ -155,10 +166,9 @@ const StructureRepairPartsList = () => {
 			<>
 				<Outlet />
 				<PageLayout>
-					<ListHeaderLayout
-						addButtonText="Add Repair Part"
-						addButtonAction={() => navigate('create')}
-						titleText="Repair Parts" />
+					<ListHeaderLayout titleText="Repair Parts">
+						{headerContent}
+					</ListHeaderLayout>
 					<DataTable
 						fields={fields}
 						rows={tableRows}

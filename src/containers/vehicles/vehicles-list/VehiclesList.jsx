@@ -1,6 +1,8 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet } from 'react-router-dom';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Add from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
@@ -105,6 +107,16 @@ const VehiclesList = () => {
 		dispatch(setSortedBy({ direction, field }));
 	}, [dispatch, sortedBy]);
 
+	const headerContent = useMemo(() => (
+		<Button
+			sx={{ borderRadius: '25px' }}
+			variant="contained"
+			startIcon={<Add />}
+			onClick={() => navigate('create')}>
+			Add Structure
+		</Button>
+	), [navigate]);
+
 	const tableRows = useMemo(() => {
 		return vehicleData.map((vehicle) => (
 			<VehicleRow
@@ -163,10 +175,10 @@ const VehiclesList = () => {
 				<Outlet />
 				<PageLayout>
 					<ListHeaderLayout
-						addButtonText="Add Vehicle"
-						addButtonAction={() => navigate('create')}
 						additionalContent={showArchivedButton}
-						titleText="Vehicles" />
+						titleText="Vehicles">
+						{headerContent}
+					</ListHeaderLayout>
 					<DataTable
 						fields={fields}
 						onSortChange={onSortChange}
