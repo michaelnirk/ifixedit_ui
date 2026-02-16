@@ -1,6 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Outlet, useParams } from 'react-router-dom';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Add from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
@@ -69,6 +71,16 @@ const VehicleRepairPartsList = () => {
 	const selectRepairParts = useMemo(() => selectSortedVehicleRepairPartsData(repairId), [repairId]);
 	const repairPartsData = useSelector(selectRepairParts);
 	const sortedBy = useSelector(selectSortedBy);
+
+	const headerContent = useMemo(() => (
+		<Button
+			sx={{ borderRadius: '25px' }}
+			variant="contained"
+			startIcon={<Add />}
+			onClick={() => navigate('create')}>
+			Add Repair Part
+		</Button>
+	), [navigate]);
 
 	// RTK Query hooks
 	const { isLoading, isError: isRepairPartsError } = useListRepairPartsQuery({ repairId, userId }, {
@@ -152,10 +164,9 @@ const VehicleRepairPartsList = () => {
 			<>
 				<Outlet />
 				<PageLayout>
-					<ListHeaderLayout
-						addButtonText="Add Repair Part"
-						addButtonAction={() => navigate('create')}
-						titleText="Repair Parts" />
+					<ListHeaderLayout titleText="Repair Parts">
+						{headerContent}
+					</ListHeaderLayout>
 					<DataTable
 						fields={fields}
 						onSortChange={onSortChange}
