@@ -113,7 +113,7 @@ const VehiclesList = () => {
 			variant="contained"
 			startIcon={<Add />}
 			onClick={() => navigate('create')}>
-			Add Structure
+			Add Vehicle
 		</Button>
 	), [navigate]);
 
