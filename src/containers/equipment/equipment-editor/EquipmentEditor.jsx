@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import dayjs from 'dayjs';
 import Box from '@mui/material/Box';
@@ -10,16 +10,12 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
-import TextField from '@mui/material/TextField';
 import FormButtonGroup from '@/components/FormButtonGroup.jsx';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import MenuItem from '@mui/material/MenuItem';
 import Switch from '@mui/material/Switch';
-import InputRow from '@/components/InputRow';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { selectUserId } from '@/state/features/authSlice';
-import { selectIsOpen, setIsOpen } from './slice';
+import { closeEditor, openEditor, selectIsOpen } from './slice';
 import { showNotification } from '@/state/features/notificationSlice';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
 import {
@@ -29,6 +25,9 @@ import {
 	useUpdateEquipmentMutation
 } from '@/state/api/rootApi';
 import { useNotes } from '@/useNotes.jsx';
+import { useEditorLifecycle } from '@/containers/shared/useEditorLifecycle';
+import { formatDateTimeOrNull } from '@/utils/date';
+import SchemaFormSection from '@/components/editors/SchemaFormSection';
 
 const defaultEquipment = {
 	acquisition_date: null,
@@ -42,12 +41,26 @@ const defaultEquipment = {
 	notes: []
 };
 
+const EQUIPMENT_FORM_ROWS = [
+	[
+		{ autoFocus: true, flex: 12, fullWidth: true, label: 'Name', name: 'name', required: 'Name is required' }
+	],
+	[
+		{ flex: 12, fullWidth: true, label: 'Description', name: 'description', required: 'Description is required' }
+	],
+	[
+		{ flex: 4, label: 'Acquisition Date', name: 'acquisition_date', type: 'date' },
+		{ flex: 4, label: 'Cost', name: 'cost', step: '0.01', type: 'number' },
+		{ flex: 4, label: 'Cost Currency', name: 'cost_currency', optionLabel: 'currency_symbol', optionsKey: 'currencies', optionValue: 'currency_id', type: 'select' }
+	]
+];
+
 const EquipmentEditor = () => {
 	const dispatch = useDispatch();
-	const navigate = useNavigate();
 	const { equipmentId } = useParams();
 	const userId = useSelector(selectUserId);
 	const isOpen = useSelector(selectIsOpen);
+	const { onBack, onCloseModal } = useEditorLifecycle({ closeEditor, openDependency: equipmentId, openEditor });
 
 	// RTK Query to get structure data for editing
 	const { data: equipment, isError: isErrorEquipment, isLoading } = useGetEquipmentQuery(
@@ -57,10 +70,6 @@ const EquipmentEditor = () => {
 	const { data: currencies = [], isError: isErrorCurrencies } = useListCurrenciesQuery(userId, {
 		skip: !userId
 	});
-
-	useEffect(() => {
-		dispatch(setIsOpen(true));
-	}, [dispatch, equipmentId]);
 
 	const methods = useForm({
 		defaultValues: defaultEquipment
@@ -86,10 +95,9 @@ const EquipmentEditor = () => {
 
 	const onSubmit = async (equipmentData) => {
 		try {
-			// Format acquisition_date to 'YYYY-MM-DD HH:mm:ss' or null
 			const dataToSubmit = {
 				...equipmentData,
-				acquisition_date: equipmentData.acquisition_date ? dayjs(equipmentData.acquisition_date).format('YYYY-MM-DD HH:mm:ss') : null
+				acquisition_date: formatDateTimeOrNull(equipmentData.acquisition_date)
 			};
 
 			if (equipmentId) {
@@ -110,7 +118,7 @@ const EquipmentEditor = () => {
 				message: `Equipment Item ${equipmentId ? 'updated' : 'created'} successfully!`,
 				severity: 'success'
 			}));
-			navigate('..');
+			onBack();
 		} catch {
 			dispatch(showNotification({
 				alertVariant: 'filled',
@@ -118,15 +126,6 @@ const EquipmentEditor = () => {
 				severity: 'error'
 			}));
 		}
-	};
-
-	const onBack = () => {
-		navigate('..');
-	};
-
-	const onCloseModal = () => {
-		dispatch(setIsOpen(false));
-		navigate('..');
 	};
 
 	const submitButtonLabel = useMemo(() => {
@@ -183,100 +182,11 @@ const EquipmentEditor = () => {
 							</Box>
 						) : (
 							<form onSubmit={methods.handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column' }}>
-								<InputRow>
-									<Controller
-										name="name"
-										control={methods.control}
-										rules={{ required: 'Name is required' }}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													autoFocus
-													style={{ flex: 12 }}
-													margin="normal"
-													label="Name *"
-													fullWidth
-													size="small"
-													error={!!methods.formState.errors.name}
-													helperText={methods.formState.errors.name ? methods.formState.errors.name.message : ''} />
-											)
-										} />
-								</InputRow>
-								<InputRow>
-									<Controller
-										name="description"
-										control={methods.control}
-										rules={{ required: 'Description is required' }}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 12 }}
-													margin="normal"
-													label="Description *"
-													fullWidth
-													size="small"
-													error={!!methods.formState.errors.description}
-													helperText={methods.formState.errors.description ? methods.formState.errors.description.message : ''} />
-											)
-										} />
-								</InputRow>
-								<InputRow>
-									<Controller
-										name="acquisition_date"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<DatePicker
-													{...field}
-													format="DD MMMM YYYY"
-													label="Acquisition Date"
-													sx={{ flex: 4 }}
-													slotProps={{ textField: { margin: 'normal', size: 'small' } }} />
-											)
-										} />
-									<Controller
-										name="cost"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 4 }}
-													margin="normal"
-													label="Cost"
-													size="small"
-													type="number"
-													step="0.01" />
-											)
-										} />
-									<Controller
-										name="cost_currency"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 4 }}
-													margin="normal"
-													label="Cost Currency"
-													select
-													size="small">
-													{
-														(currencies || []).map((currency) => (
-															<MenuItem
-																key={currency.currency_id}
-																value={currency.currency_id}
-																selected={currency.currency_id === methods.getValues('cost_currency')}>
-																{currency.currency_symbol}
-															</MenuItem>
-														))
-													}
-												</TextField>
-											)
-										} />
-								</InputRow>
+								<SchemaFormSection
+									control={methods.control}
+									errors={methods.formState.errors}
+									rows={EQUIPMENT_FORM_ROWS}
+									selectOptions={{ currencies }} />
 								{NotesSection}
 								<FormButtonGroup
 									onCancel={onBack}

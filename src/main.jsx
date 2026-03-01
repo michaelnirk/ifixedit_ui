@@ -6,8 +6,6 @@ import { store } from '@/state/store.js';
 import AuthProvider from '@/components/AuthProvider.jsx';
 import App from '@/containers/app/App.jsx';
 import { CssBaseline } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { ConfirmProvider } from 'material-ui-confirm';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '@/theme/theme.js';
@@ -19,9 +17,7 @@ createRoot(document.getElementById('root')).render(
 				<AuthProvider>
 					<ThemeProvider theme={theme}>
 						<CssBaseline />
-						<LocalizationProvider dateAdapter={AdapterDayjs}>
-							<App />
-						</LocalizationProvider>
+						<App />
 					</ThemeProvider>
 				</AuthProvider>
 			</ConfirmProvider>

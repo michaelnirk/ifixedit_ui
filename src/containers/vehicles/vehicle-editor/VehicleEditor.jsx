@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import dayjs from 'dayjs';
 import Box from '@mui/material/Box';
@@ -10,16 +10,12 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
-import TextField from '@mui/material/TextField';
 import FormGroup from '@mui/material/FormGroup';
 import FormButtonGroup from '@/components/FormButtonGroup.jsx';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import MenuItem from '@mui/material/MenuItem';
 import Switch from '@mui/material/Switch';
-import InputRow from '@/components/InputRow';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { selectUserId } from '@/state/features/authSlice';
-import { selectIsOpen, setIsOpen } from './slice';
+import { closeEditor, openEditor, selectIsOpen } from './slice';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
 import { useListCurrenciesQuery,
 	useGetVehicleQuery,
@@ -27,6 +23,9 @@ import { useListCurrenciesQuery,
 	useUpdateVehicleMutation
 } from '@/state/api/rootApi';
 import { useNotes } from '@/useNotes.jsx';
+import { useEditorLifecycle } from '@/containers/shared/useEditorLifecycle';
+import { formatDateTimeOrNull } from '@/utils/date';
+import SchemaFormSection from '@/components/editors/SchemaFormSection';
 
 const defaultVehicle = {
 	archived: false,
@@ -45,12 +44,33 @@ const defaultVehicle = {
 	year: ''
 };
 
+const VEHICLE_FORM_ROWS = [
+	[
+		{ autoFocus: true, flex: 12, fullWidth: true, label: 'Name', name: 'name', required: 'Name is required' }
+	],
+	[
+		{ flex: 6, label: 'Make', name: 'make' },
+		{ flex: 6, fullWidth: true, label: 'Model', name: 'model' }
+	],
+	[
+		{ flex: 3, label: 'Year', name: 'year', type: 'number' },
+		{ flex: 3, label: 'Date Purchased', name: 'date_purchased', type: 'date' },
+		{ flex: 3, label: 'Purchase Price', name: 'purchase_price', step: '0.01', type: 'number' },
+		{ flex: 3, label: 'Purchase Currency', name: 'purchase_currency', optionLabel: 'currency_symbol', optionsKey: 'currencies', optionValue: 'currency_id', type: 'select' }
+	],
+	[
+		{ flex: 3, label: 'Mileage at Purchase', name: 'km_at_purchase', type: 'number' },
+		{ flex: 3, label: 'VIN', name: 'vin' },
+		{ flex: 3, label: 'License Plate', name: 'license_plate' },
+		{ flex: 3, label: 'Key Code', name: 'key_code' }
+	]
+];
+
 const VehicleEditor = () => {
-	const dispatch = useDispatch();
-	const navigate = useNavigate();
 	const { vehicleId } = useParams();
 	const userId = useSelector(selectUserId);
 	const isOpen = useSelector(selectIsOpen);
+	const { onBack, onCloseModal } = useEditorLifecycle({ closeEditor, openDependency: vehicleId, openEditor });
 
 	// RTK Query to get vehicle data for editing
 	const { data: vehicle, error, isError, isLoading } = useGetVehicleQuery(
@@ -60,10 +80,6 @@ const VehicleEditor = () => {
 	const { data: currencies = [] } = useListCurrenciesQuery(userId, {
 		skip: !userId
 	});
-
-	useEffect(() => {
-		dispatch(setIsOpen(true));
-	}, [dispatch, vehicleId]);
 
 	const methods = useForm({
 		defaultValues: defaultVehicle
@@ -99,10 +115,9 @@ const VehicleEditor = () => {
 
 	const onSubmit = async (vehicleData) => {
 		try {
-			// Format date_purchased to 'YYYY-MM-DD HH:mm:ss' or null
 			const dataToSubmit = {
 				...vehicleData,
-				date_purchased: vehicleData.date_purchased ? dayjs(vehicleData.date_purchased).format('YYYY-MM-DD HH:mm:ss') : null
+				date_purchased: formatDateTimeOrNull(vehicleData.date_purchased)
 			};
 
 			if (vehicleId) {
@@ -117,19 +132,10 @@ const VehicleEditor = () => {
 					vehicleData: dataToSubmit
 				}).unwrap();
 			}
-			navigate('..');
+			onBack();
 		} catch (error) {
 			console.error('Failed to save vehicle:', error);
 		}
-	};
-
-	const onBack = () => {
-		navigate('..');
-	};
-
-	const onCloseModal = () => {
-		dispatch(setIsOpen(false));
-		navigate('..');
 	};
 
 	if (!userId) {
@@ -185,180 +191,11 @@ const VehicleEditor = () => {
 							</Box>
 						) : (
 							<form onSubmit={methods.handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column' }}>
-								<InputRow>
-									<Controller
-										name="name"
-										control={methods.control}
-										rules={{ required: 'Name is required' }}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													autoFocus
-													style={{ flex: 12 }}
-													margin="normal"
-													label="Name *"
-													fullWidth
-													size="small"
-													error={!!methods.formState.errors.name}
-													helperText={methods.formState.errors.name ? methods.formState.errors.name.message : ''} />
-											)
-										} />
-								</InputRow>
-								<InputRow>
-									<Controller
-										name="make"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 6 }}
-													margin="normal"
-													label="Make"
-													size="small" />
-											)
-										} />
-									<Controller
-										name="model"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 6 }}
-													margin="normal"
-													label="Model"
-													fullWidth
-													size="small" />
-											)
-										} />
-								</InputRow>
-								<InputRow>
-									<Controller
-										name="year"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 3 }}
-													margin="normal"
-													label="Year"
-													size="small"
-													type="number" />
-											)
-										} />
-									<Controller
-										name="date_purchased"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<DatePicker
-													{...field}
-													format="DD MMMM YYYY"
-													label="Date Purchased"
-													sx={{ flex: 3 }}
-													slotProps={{ textField: { margin: 'normal', size: 'small' } }} />
-											)
-										} />
-									<Controller
-										name="purchase_price"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 3 }}
-													margin="normal"
-													label="Purchase Price"
-													size="small"
-													type="number"
-													step="0.01" />
-											)
-										} />
-
-									<Controller
-										name="purchase_currency"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 3 }}
-													margin="normal"
-													label="Purchase Currency"
-													select
-													size="small">
-													{
-														currencies.map((currency) => (
-															<MenuItem
-																key={currency.currency_id}
-																value={currency.currency_id}
-																selected={currency.currency_id === methods.getValues('purchase_currency')}>
-																{currency.currency_symbol}
-															</MenuItem>
-														))
-													}
-												</TextField>
-											)
-										} />
-								</InputRow>
-								<InputRow>
-									<Controller
-										name="km_at_purchase"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 3 }}
-													margin="normal"
-													label="Mileage at Purchase"
-													size="small"
-													type="number" />
-											)
-										} />
-									<Controller
-										name="vin"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 3 }}
-													margin="normal"
-													label="VIN"
-													size="small" />
-											)
-										} />
-									<Controller
-										name="license_plate"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 3 }}
-													margin="normal"
-													label="License Plate"
-													size="small" />
-											)
-										} />
-									<Controller
-										name="key_code"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 3 }}
-													margin="normal"
-													label="Key Code"
-													size="small" />
-											)
-										} />
-								</InputRow>
+								<SchemaFormSection
+									control={methods.control}
+									errors={methods.formState.errors}
+									rows={VEHICLE_FORM_ROWS}
+									selectOptions={{ currencies }} />
 								{NotesSection}
 								<FormButtonGroup
 									onCancel={onBack}

@@ -1,22 +1,7 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createEditorDialogSlice } from '@/state/features/createEditorDialogSlice';
 
-const initialState = {
-	isOpen: false
-};
-
-const slice = createSlice({
-	initialState,
-	name: 'structureRepairEditor',
-	reducers: {
-		setIsOpen(state, action) {
-			state.isOpen = action.payload;
-		}
-	},
-	selectors: {
-		selectIsOpen: (state) => state.isOpen
-	}
-});
+const slice = createEditorDialogSlice('structureRepairEditor');
 
 export default slice;
-export const { setIsOpen } = slice.actions;
+export const { closeEditor, openEditor } = slice.actions;
 export const { selectIsOpen } = slice.selectors;

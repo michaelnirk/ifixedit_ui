@@ -1,170 +1,186 @@
+import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import AppLayout from '@/components/app-layout/AppLayout.jsx';
-import Login from '@/containers/Login.jsx';
-import HomePage from '@/containers/HomePage.jsx';
-import VehiclesList from '@/containers/vehicles/vehicles-list/VehiclesList.jsx';
-import VehicleEditor from '@/containers/vehicles/vehicle-editor/VehicleEditor.jsx';
-import StructuresList from '@/containers/structures/structures-list/StructuresList.jsx';
-import StructureEditor from '@/containers/structures/structure-editor/StructureEditor.jsx';
-import StructureRepairsList from '@/containers/structures/structure-repairs/structure-repairs-list/StructureRepairsList.jsx';
-import StructureRepairEditor from '@/containers/structures/structure-repairs/StructureRepairEditor.jsx';
-import StructureRepairPartsList from '@/containers/structures/structure-repair-parts/structure-repair-parts-list/StructureRepairPartsList.jsx';
-import StructureRepairPartEditor from '@/containers/structures/structure-repair-parts/StructureRepairPartEditor.jsx';
-import EquipmentEditor from '@/containers/equipment/equipment-editor/EquipmentEditor.jsx';
-import EquipmentList from '@/containers/equipment/equipment-list/EquipmentList.jsx';
-import EquipmentRepairsList from '@/containers/equipment/equipment-repairs/equipment-repairs-list/EquipmentRepairsList.jsx';
-import EquipmentRepairEditor from '@/containers/equipment/equipment-repairs/equipment-repairs-editor/EquipmentRepairEditor.jsx';
-import EquipmentRepairPartsList from '@/containers/equipment/equipment-repair-parts/equipment-repair-parts-list/EquipmentRepairPartsList.jsx';
-import EquipmentRepairPartEditor from '@/containers/equipment/equipment-repair-parts/EquipmentRepairPartEditor.jsx';
-import VehicleRepairsList from '@/containers/vehicles/vehicle-repairs/vehicle-repairs-list/VehicleRepairsList.jsx';
-import VehicleRepairEditor from '@/containers/vehicles/vehicle-repairs/vehicle-repairs-editor/VehicleRepairEditor.jsx';
-import VehicleRepairPartsList from '@/containers/vehicles/vehicle-repair-parts/vehicle-repair-parts-list/VehicleRepairPartsList.jsx';
-import VehicleRepairPartEditor from '@/containers/vehicles/vehicle-repair-parts/vehicle-repair-parts-editor/VehicleRepairPartEditor.jsx';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import ProtectedRoute from '@/components/ProtectedRoute.jsx';
-import NotFoundPage from '@/containers/NotFoundPage.jsx';
-import React from 'react';
+
+const AppLayout = lazy(() => import('@/components/app-layout/AppLayout.jsx'));
+const Login = lazy(() => import('@/containers/Login.jsx'));
+const HomePage = lazy(() => import('@/containers/HomePage.jsx'));
+const VehiclesList = lazy(() => import('@/containers/vehicles/vehicles-list/VehiclesList.jsx'));
+const VehicleEditor = lazy(() => import('@/containers/vehicles/vehicle-editor/VehicleEditor.jsx'));
+const VehicleRepairsList = lazy(() => import('@/containers/vehicles/vehicle-repairs/vehicle-repairs-list/VehicleRepairsList.jsx'));
+const VehicleRepairEditor = lazy(() => import('@/containers/vehicles/vehicle-repairs/vehicle-repairs-editor/VehicleRepairEditor.jsx'));
+const VehicleRepairPartsList = lazy(() => import('@/containers/vehicles/vehicle-repair-parts/vehicle-repair-parts-list/VehicleRepairPartsList.jsx'));
+const VehicleRepairPartEditor = lazy(() => import('@/containers/vehicles/vehicle-repair-parts/vehicle-repair-parts-editor/VehicleRepairPartEditor.jsx'));
+const StructuresList = lazy(() => import('@/containers/structures/structures-list/StructuresList.jsx'));
+const StructureEditor = lazy(() => import('@/containers/structures/structure-editor/StructureEditor.jsx'));
+const StructureRepairsList = lazy(() => import('@/containers/structures/structure-repairs/structure-repairs-list/StructureRepairsList.jsx'));
+const StructureRepairEditor = lazy(() => import('@/containers/structures/structure-repairs/StructureRepairEditor.jsx'));
+const StructureRepairPartsList = lazy(() => import('@/containers/structures/structure-repair-parts/structure-repair-parts-list/StructureRepairPartsList.jsx'));
+const StructureRepairPartEditor = lazy(() => import('@/containers/structures/structure-repair-parts/StructureRepairPartEditor.jsx'));
+const EquipmentList = lazy(() => import('@/containers/equipment/equipment-list/EquipmentList.jsx'));
+const EquipmentEditor = lazy(() => import('@/containers/equipment/equipment-editor/EquipmentEditor.jsx'));
+const EquipmentRepairsList = lazy(() => import('@/containers/equipment/equipment-repairs/equipment-repairs-list/EquipmentRepairsList.jsx'));
+const EquipmentRepairEditor = lazy(() => import('@/containers/equipment/equipment-repairs/equipment-repairs-editor/EquipmentRepairEditor.jsx'));
+const EquipmentRepairPartsList = lazy(() => import('@/containers/equipment/equipment-repair-parts/equipment-repair-parts-list/EquipmentRepairPartsList.jsx'));
+const EquipmentRepairPartEditor = lazy(() => import('@/containers/equipment/equipment-repair-parts/EquipmentRepairPartEditor.jsx'));
+const NotFoundPage = lazy(() => import('@/containers/NotFoundPage.jsx'));
+
+const RouteLoader = () => (
+	<Box
+		sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', minHeight: '40vh' }}>
+		<CircularProgress />
+	</Box>
+);
+
+const withSuspense = (element) => (
+	<Suspense fallback={<RouteLoader />}>
+		{element}
+	</Suspense>
+);
 
 const router = createBrowserRouter([
 	{
-		element: <Login />,
+		element: withSuspense(<Login />),
 		path: '/login'
 	},
 	{
 		children: [
 			{
-				element: <HomePage />,
+				element: withSuspense(<HomePage />),
 				index: true
 			},
 			{
 				children: [
 					{
-						element: <VehicleEditor />,
+						element: withSuspense(<VehicleEditor />),
 						path: 'create'
 					},
 					{
-						element: <VehicleEditor />,
+						element: withSuspense(<VehicleEditor />),
 						path: ':vehicleId/edit'
 					},
 					{
 						children: [
 							{
-								element: <VehicleRepairEditor />,
+								element: withSuspense(<VehicleRepairEditor />),
 								path: 'create'
 							},
 							{
-								element: <VehicleRepairEditor />,
+								element: withSuspense(<VehicleRepairEditor />),
 								path: ':repairId/edit'
 							},
 							{
 								children: [
 									{
-										element: <VehicleRepairPartEditor />,
+										element: withSuspense(<VehicleRepairPartEditor />),
 										path: 'create'
 									},
 									{
-										element: <VehicleRepairPartEditor />,
+										element: withSuspense(<VehicleRepairPartEditor />),
 										path: ':partId/edit'
 									}
 								],
-								element: <VehicleRepairPartsList />,
+								element: withSuspense(<VehicleRepairPartsList />),
 								path: ':repairId/parts'
 							}
 						],
-						element: <VehicleRepairsList />,
+						element: withSuspense(<VehicleRepairsList />),
 						path: ':vehicleId/repairs'
 					}
 				],
-				element: <VehiclesList />,
+				element: withSuspense(<VehiclesList />),
 				path: '/vehicles'
 			},
 			{
 				children: [
 					{
-						element: <StructureEditor />,
+						element: withSuspense(<StructureEditor />),
 						path: 'create'
 					},
 					{
-						element: <StructureEditor />,
+						element: withSuspense(<StructureEditor />),
 						path: ':structureId/edit'
 					},
 					{
 						children: [
 							{
-								element: <StructureRepairEditor />,
+								element: withSuspense(<StructureRepairEditor />),
 								path: 'create'
 							},
 							{
-								element: <StructureRepairEditor />,
+								element: withSuspense(<StructureRepairEditor />),
 								path: ':repairId/edit'
 							},
 							{
 								children: [
 									{
-										element: <StructureRepairPartEditor />,
+										element: withSuspense(<StructureRepairPartEditor />),
 										path: 'create'
 									},
 									{
-										element: <StructureRepairPartEditor />,
+										element: withSuspense(<StructureRepairPartEditor />),
 										path: ':partId/edit'
 									}
 								],
-								element: <StructureRepairPartsList />,
+								element: withSuspense(<StructureRepairPartsList />),
 								path: ':repairId/parts'
 							}
 						],
-						element: <StructureRepairsList />,
+						element: withSuspense(<StructureRepairsList />),
 						path: ':structureId/repairs'
 					}
 				],
-				element: <StructuresList />,
+				element: withSuspense(<StructuresList />),
 				path: '/structures'
 			},
 			{
 				children: [
 					{
-						element: <EquipmentEditor />,
+						element: withSuspense(<EquipmentEditor />),
 						path: 'create'
 					},
 					{
-						element: <EquipmentEditor />,
+						element: withSuspense(<EquipmentEditor />),
 						path: ':equipmentId/edit'
 					},
 					{
 						children: [
 							{
-								element: <EquipmentRepairEditor />,
+								element: withSuspense(<EquipmentRepairEditor />),
 								path: 'create'
 							},
 							{
-								element: <EquipmentRepairEditor />,
+								element: withSuspense(<EquipmentRepairEditor />),
 								path: ':repairId/edit'
 							},
 							{
 								children: [
 									{
-										element: <EquipmentRepairPartEditor />,
+										element: withSuspense(<EquipmentRepairPartEditor />),
 										path: 'create'
 									},
 									{
-										element: <EquipmentRepairPartEditor />,
+										element: withSuspense(<EquipmentRepairPartEditor />),
 										path: ':partId/edit'
 									}
 								],
-								element: <EquipmentRepairPartsList />,
+								element: withSuspense(<EquipmentRepairPartsList />),
 								path: ':repairId/parts'
 							}
 						],
-						element: <EquipmentRepairsList />,
+						element: withSuspense(<EquipmentRepairsList />),
 						path: ':equipmentId/repairs'
 					}
 				],
-				element: <EquipmentList />,
+				element: withSuspense(<EquipmentList />),
 				path: '/equipment'
 			},
 			{
 				element: (
 					<ProtectedRoute>
-						<NotFoundPage />
+						{withSuspense(<NotFoundPage />)}
 					</ProtectedRoute>
 				),
 				path: '*'
@@ -172,7 +188,7 @@ const router = createBrowserRouter([
 		],
 		element: (
 			<ProtectedRoute>
-				<AppLayout />
+				{withSuspense(<AppLayout />)}
 			</ProtectedRoute>
 		),
 		path: '/'

@@ -1,13 +1,14 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { lazy, Suspense, useCallback, useMemo } from 'react';
 import AppBar from '@mui/material/AppBar';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { useLocation, useNavigate } from 'react-router-dom';
-import NavMenu from '@/components/NavMenu.jsx';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/state/features/authSlice';
+
+const NavMenu = lazy(() => import('@/components/NavMenu.jsx'));
 
 const AppHeader = () => {
 	const navigate = useNavigate();
@@ -49,7 +50,9 @@ const AppHeader = () => {
 					sx={{ flexGrow: 1 }}>
 					{sectionName}
 				</Typography>
-				<NavMenu />
+				<Suspense fallback={null}>
+					<NavMenu />
+				</Suspense>
 				<Button
 					sx={
 						{ '&:focus': {

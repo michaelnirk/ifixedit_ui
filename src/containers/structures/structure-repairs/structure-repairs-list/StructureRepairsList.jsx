@@ -65,7 +65,7 @@ const StructureRepairsList = () => {
 			dispatch(setSearchTerm(''));
 			dispatch(setSortedBy({ direction: 'desc', field: 'repair_date' }));
 		};
-	}, []);
+	}, [dispatch]);
 
 	// RTK Query hooks
 	const { isLoading, isError: isRepairsError } = useListRepairsQuery({ entityId: structureId, userId }, {

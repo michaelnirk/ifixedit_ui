@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import dayjs from 'dayjs';
 import Box from '@mui/material/Box';
@@ -9,16 +9,12 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
-import TextField from '@mui/material/TextField';
 import FormButtonGroup from '@/components/FormButtonGroup.jsx';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import MenuItem from '@mui/material/MenuItem';
 import Switch from '@mui/material/Switch';
-import InputRow from '@/components/InputRow';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { selectUserId } from '@/state/features/authSlice';
-import { selectIsOpen, setIsOpen } from './slice';
+import { closeEditor, openEditor, selectIsOpen } from './slice';
 import { showNotification } from '@/state/features/notificationSlice';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
 import {
@@ -29,6 +25,9 @@ import {
 	useUpdateStructureMutation
 } from '@/state/api/rootApi';
 import { useNotes } from '@/useNotes.jsx';
+import { useEditorLifecycle } from '@/containers/shared/useEditorLifecycle';
+import { formatDateTimeOrNull } from '@/utils/date';
+import SchemaFormSection from '@/components/editors/SchemaFormSection';
 
 const defaultStructure = {
 	acquisition_date: null,
@@ -42,12 +41,27 @@ const defaultStructure = {
 	structure_id: ''
 };
 
+const STRUCTURE_FORM_ROWS = [
+	[
+		{ autoFocus: true, flex: 12, fullWidth: true, label: 'Name', name: 'name', required: 'Name is required' }
+	],
+	[
+		{ flex: 12, fullWidth: true, label: 'Description', name: 'description' }
+	],
+	[
+		{ flex: 3, label: 'How Acquired', name: 'how_acquired', optionLabel: 'name', optionsKey: 'acquisitionMethods', optionValue: 'acquisition_method_id', type: 'select' },
+		{ flex: 3, label: 'Acquisition Date', name: 'acquisition_date', type: 'date' },
+		{ flex: 3, label: 'Cost', name: 'cost', step: '0.01', type: 'number' },
+		{ flex: 3, label: 'Cost Currency', name: 'cost_currency', optionLabel: 'currency_symbol', optionsKey: 'currencies', optionValue: 'currency_id', type: 'select' }
+	]
+];
+
 const StructureEditor = () => {
 	const dispatch = useDispatch();
-	const navigate = useNavigate();
 	const { structureId } = useParams();
 	const userId = useSelector(selectUserId);
 	const isOpen = useSelector(selectIsOpen);
+	const { onBack, onCloseModal } = useEditorLifecycle({ closeEditor, openDependency: structureId, openEditor });
 
 	// RTK Query to get structure data for editing
 	const { data: structure, isError: isErrorStructure, isLoading } = useGetStructureQuery(
@@ -61,10 +75,6 @@ const StructureEditor = () => {
 	const { data: acquisitionMethods = [], isError: isErrorAcquisitionMethods } = useListAcquisitionMethodsQuery(userId, {
 		skip: !userId
 	});
-
-	useEffect(() => {
-		dispatch(setIsOpen(true));
-	}, [dispatch, structureId]);
 
 	const methods = useForm({
 		defaultValues: defaultStructure
@@ -91,10 +101,9 @@ const StructureEditor = () => {
 
 	const onSubmit = async (structureData) => {
 		try {
-			// Format date_purchased to 'YYYY-MM-DD HH:mm:ss' or null
 			const dataToSubmit = {
 				...structureData,
-				acquisition_date: structureData.acquisition_date ? dayjs(structureData.acquisition_date).format('YYYY-MM-DD HH:mm:ss') : null
+				acquisition_date: formatDateTimeOrNull(structureData.acquisition_date)
 			};
 
 			if (structureId) {
@@ -115,7 +124,7 @@ const StructureEditor = () => {
 				message: `Structure ${structureId ? 'updated' : 'created'} successfully!`,
 				severity: 'success'
 			}));
-			navigate('..');
+			onBack();
 		} catch {
 			dispatch(showNotification({
 				alertVariant: 'filled',
@@ -123,15 +132,6 @@ const StructureEditor = () => {
 				severity: 'error'
 			}));
 		}
-	};
-
-	const onBack = () => {
-		navigate('..');
-	};
-
-	const onCloseModal = () => {
-		dispatch(setIsOpen(false));
-		navigate('..');
 	};
 
 	const submitButtonLabel = useMemo(() => {
@@ -188,123 +188,11 @@ const StructureEditor = () => {
 							</Box>
 						) : (
 							<form onSubmit={methods.handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column' }}>
-								<InputRow>
-									<Controller
-										name="name"
-										control={methods.control}
-										rules={{ required: 'Name is required' }}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													autoFocus
-													style={{ flex: 12 }}
-													margin="normal"
-													label="Name *"
-													fullWidth
-													size="small"
-													error={!!methods.formState.errors.name}
-													helperText={methods.formState.errors.name ? methods.formState.errors.name.message : ''} />
-											)
-										} />
-								</InputRow>
-								<InputRow>
-									<Controller
-										name="description"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 12 }}
-													margin="normal"
-													label="Description *"
-													fullWidth
-													size="small" />
-											)
-										} />
-								</InputRow>
-								<InputRow>
-									<Controller
-										name="how_acquired"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 3 }}
-													margin="normal"
-													label="How Acquired"
-													select
-													size="small">
-													{
-														acquisitionMethods.map((acquisitionMethod) => (
-															<MenuItem
-																key={acquisitionMethod.acquisition_method_id}
-																value={acquisitionMethod.acquisition_method_id}
-																selected={acquisitionMethod.acquisition_method_id === methods.getValues('how_acquired')}>
-																{acquisitionMethod.name}
-															</MenuItem>
-														))
-													}
-												</TextField>
-											)
-										} />
-									<Controller
-										name="acquisition_date"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<DatePicker
-													{...field}
-													format="DD MMMM YYYY"
-													label="Acquisition Date"
-													sx={{ flex: 3 }}
-													slotProps={{ textField: { margin: 'normal', size: 'small' } }} />
-											)
-										} />
-									<Controller
-										name="cost"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 3 }}
-													margin="normal"
-													label="Cost"
-													size="small"
-													type="number"
-													step="0.01" />
-											)
-										} />
-
-									<Controller
-										name="cost_currency"
-										control={methods.control}
-										render={
-											({ field }) => (
-												<TextField
-													{...field}
-													style={{ flex: 3 }}
-													margin="normal"
-													label="Cost Currency"
-													select
-													size="small">
-													{
-														currencies.map((currency) => (
-															<MenuItem
-																key={currency.currency_id}
-																value={currency.currency_id}
-																selected={currency.currency_id === methods.getValues('cost_currency')}>
-																{currency.currency_symbol}
-															</MenuItem>
-														))
-													}
-												</TextField>
-											)
-										} />
-								</InputRow>
+								<SchemaFormSection
+									control={methods.control}
+									errors={methods.formState.errors}
+									rows={STRUCTURE_FORM_ROWS}
+									selectOptions={{ acquisitionMethods, currencies }} />
 								{NotesSection}
 								<FormButtonGroup
 									onCancel={onBack}

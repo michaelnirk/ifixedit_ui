@@ -68,9 +68,9 @@ const VehicleRepairsList = () => {
 	useEffect(() => {
 		return () => {
 			dispatch(setSearchTerm(''));
-			dispatch(setSortedBy({ field: 'repair_date', direction: 'desc' }));
-		}
-	}, []);
+			dispatch(setSortedBy({ direction: 'desc', field: 'repair_date' }));
+		};
+	}, [dispatch]);
 
 	// RTK Query hooks
 	const { isLoading, isError: isRepairsError } = useListRepairsQuery({ entityId: vehicleId, userId }, {
