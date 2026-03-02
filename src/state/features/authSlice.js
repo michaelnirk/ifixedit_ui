@@ -3,45 +3,33 @@ import { rootApi } from '@/state/api/rootApi';
 
 // Storage keys
 const TOKEN_STORAGE_KEY = 'auth_token';
+const REFRESH_TOKEN_STORAGE_KEY = 'auth_refresh_token';
 const USER_STORAGE_KEY = 'auth_user';
-
-// Check if user is authenticated based on token in state
-const isTokenValid = (token) => {
-	if (!token) {
-		return false;
-	}
-
-	try {
-		// Basic JWT expiration check
-		const payload = JSON.parse(atob(token.split('.')[1]));
-		const currentTime = Date.now() / 1000;
-		return payload.exp > currentTime;
-	} catch (error) {
-		console.error('Error parsing token:', error);
-		return false;
-	}
-};
 
 // Load initial state from localStorage
 const loadInitialAuthState = () => {
 	try {
 		const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+		const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
 		const user = localStorage.getItem(USER_STORAGE_KEY);
 
-		if (token && user && isTokenValid(token)) {
+		if (refreshToken && user) {
 			return {
 				error: null,
 				isAuthenticated: true,
+				refreshToken: refreshToken,
 				token: token,
 				user: JSON.parse(user)
 			};
 		} else {
 			// Clear invalid data
+			localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 			localStorage.removeItem(TOKEN_STORAGE_KEY);
 			localStorage.removeItem(USER_STORAGE_KEY);
 		}
 	} catch (error) {
 		console.error('Error loading auth state from localStorage:', error);
+		localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 		localStorage.removeItem(TOKEN_STORAGE_KEY);
 		localStorage.removeItem(USER_STORAGE_KEY);
 	}
@@ -49,6 +37,7 @@ const loadInitialAuthState = () => {
 	return {
 		error: null,
 		isAuthenticated: false,
+		refreshToken: null,
 		token: null,
 		user: null
 	};
@@ -70,13 +59,15 @@ const authSlice = createSlice({
 				rootApi.endpoints.login.matchFulfilled,
 				(state, action) => {
 					state.user = action.payload.user;
-					state.token = action.payload.token;
-					state.isAuthenticated = isTokenValid(action.payload.token);
+					state.token = action.payload.accessToken;
+					state.refreshToken = action.payload.refreshToken;
+					state.isAuthenticated = Boolean(action.payload.refreshToken && action.payload.user);
 					state.error = null;
 
 					// Persist to localStorage
 					try {
-						localStorage.setItem(TOKEN_STORAGE_KEY, action.payload.token);
+						localStorage.setItem(TOKEN_STORAGE_KEY, action.payload.accessToken);
+						localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, action.payload.refreshToken);
 						localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(action.payload.user));
 					} catch (error) {
 						console.error('Error saving auth to localStorage:', error);
@@ -86,11 +77,18 @@ const authSlice = createSlice({
 			.addMatcher(
 				rootApi.endpoints.login.matchRejected,
 				(state, action) => {
+					const status = action.payload?.status;
+					const errorMessage = status === 429
+						? 'Too many login attempts, try again later'
+						: (action.payload?.data?.message || action.error?.message || 'Login failed');
+
 					state.user = null;
+					state.refreshToken = null;
 					state.token = null;
 					state.isAuthenticated = false;
-					state.error = action.error?.message || 'Login failed';
+					state.error = errorMessage;
 					// Clear localStorage on failed login
+					localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 					localStorage.removeItem(TOKEN_STORAGE_KEY);
 					localStorage.removeItem(USER_STORAGE_KEY);
 				}
@@ -100,10 +98,12 @@ const authSlice = createSlice({
 				rootApi.endpoints.logout.matchFulfilled,
 				(state) => {
 					state.user = null;
+					state.refreshToken = null;
 					state.token = null;
 					state.isAuthenticated = false;
 					state.error = null;
 					// Clear localStorage
+					localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 					localStorage.removeItem(TOKEN_STORAGE_KEY);
 					localStorage.removeItem(USER_STORAGE_KEY);
 				}
@@ -113,9 +113,11 @@ const authSlice = createSlice({
 				(state) => {
 					// Even if logout API fails, we clear the state
 					state.user = null;
+					state.refreshToken = null;
 					state.token = null;
 					state.isAuthenticated = false;
 					// Clear localStorage
+					localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 					localStorage.removeItem(TOKEN_STORAGE_KEY);
 					localStorage.removeItem(USER_STORAGE_KEY);
 				}
@@ -126,13 +128,15 @@ const authSlice = createSlice({
 	reducers: {
 		checkAuthStatus: (state) => {
 			// Try to load from localStorage if not in state
-			if (!state.token) {
+			if (!state.refreshToken) {
 				try {
 					const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+					const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
 					const user = localStorage.getItem(USER_STORAGE_KEY);
 
-					if (token && user && isTokenValid(token)) {
+					if (refreshToken && user) {
 						state.token = token;
+						state.refreshToken = refreshToken;
 						state.user = JSON.parse(user);
 						state.isAuthenticated = true;
 						return;
@@ -142,13 +146,15 @@ const authSlice = createSlice({
 				}
 			}
 
-			if (state.token && isTokenValid(state.token)) {
+			if (state.refreshToken && state.user) {
 				state.isAuthenticated = true;
 			} else {
 				state.token = null;
+				state.refreshToken = null;
 				state.user = null;
 				state.isAuthenticated = false;
 				// Clear localStorage
+				localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 				localStorage.removeItem(TOKEN_STORAGE_KEY);
 				localStorage.removeItem(USER_STORAGE_KEY);
 			}
@@ -158,18 +164,29 @@ const authSlice = createSlice({
 		},
 		logout: (state) => {
 			state.user = null;
+			state.refreshToken = null;
 			state.token = null;
 			state.isAuthenticated = false;
 			state.error = null;
 			// Clear localStorage
+			localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
 			localStorage.removeItem(TOKEN_STORAGE_KEY);
 			localStorage.removeItem(USER_STORAGE_KEY);
+		},
+		setTokens: (state, action) => {
+			state.token = action.payload.accessToken;
+			state.refreshToken = action.payload.refreshToken;
+			state.isAuthenticated = Boolean(action.payload.refreshToken && state.user);
+
+			localStorage.setItem(TOKEN_STORAGE_KEY, action.payload.accessToken);
+			localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, action.payload.refreshToken);
 		}
 	}
 });
 
-export const { clearError, checkAuthStatus, logout } = authSlice.actions;
+export const { clearError, checkAuthStatus, logout, setTokens } = authSlice.actions;
 export const selectAuth = (state) => state.auth;
+export const selectRefreshToken = (state) => state.auth.refreshToken;
 export const selectToken = (state) => state.auth.token;
 export const selectUser = (state) => state.auth.user;
 export const selectUserId = (state) => state.auth.user?.user_id;

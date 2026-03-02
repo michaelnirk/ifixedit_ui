@@ -17,11 +17,41 @@ const baseQuery = fetchBaseQuery({
 
 // Base query with auth error handling
 const baseQueryWithReauth = async (args, api, extraOptions) => {
-	const result = await baseQuery(args, api, extraOptions);
+	const requestUrl = typeof args === 'string' ? args : args.url;
+	const isAuthRequest = requestUrl === '/login' || requestUrl === '/logout' || requestUrl === '/token';
+	let result = await baseQuery(args, api, extraOptions);
 
-	if (result.error && result.error.status === 401) {
-		// Token expired or invalid - dispatch logout action
-		api.dispatch({ type: 'auth/logout' });
+	if (result.error && result.error.status === 401 && !isAuthRequest) {
+		const refreshToken = api.getState().auth.refreshToken;
+
+		if (!refreshToken) {
+			api.dispatch({ type: 'auth/logout' });
+			return result;
+		}
+
+		const refreshResult = await baseQuery(
+			{
+				body: { refreshToken },
+				method: 'POST',
+				url: '/token'
+			},
+			api,
+			extraOptions
+		);
+
+		if (refreshResult.data?.accessToken && refreshResult.data?.refreshToken) {
+			api.dispatch({
+				payload: {
+					accessToken: refreshResult.data.accessToken,
+					refreshToken: refreshResult.data.refreshToken
+				},
+				type: 'auth/setTokens'
+			});
+
+			result = await baseQuery(args, api, extraOptions);
+		} else if (refreshResult.error?.status === 401) {
+			api.dispatch({ type: 'auth/logout' });
+		}
 	}
 
 	return result;
@@ -220,12 +250,14 @@ export const rootApi = createApi({
 				url: '/login'
 			}),
 			transformResponse: (response) => ({
-				token: response.accessToken,
+				accessToken: response.accessToken,
+				refreshToken: response.refreshToken,
 				user: response.user || null
 			})
 		}),
 		logout: builder.mutation({
-			query: () => ({
+			query: (refreshToken) => ({
+				body: { refreshToken },
 				method: 'POST',
 				url: '/logout'
 			})

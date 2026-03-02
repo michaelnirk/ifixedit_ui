@@ -69,7 +69,7 @@ const Login = () => {
 		}
 
 		loginMutation(formData).unwrap().then((result) => {
-			if (result.token) {
+			if (result.accessToken) {
 				// Preload currencies and end items after login
 				dispatch(rootApi.endpoints.listCurrencies.initiate(result.user.user_id));
 				dispatch(rootApi.endpoints.listEndItems.initiate(result.user.user_id));

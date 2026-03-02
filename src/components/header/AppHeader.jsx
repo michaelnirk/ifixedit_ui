@@ -5,8 +5,9 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { logout } from '@/state/features/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLogoutMutation } from '@/state/api/rootApi';
+import { logout, selectRefreshToken } from '@/state/features/authSlice';
 
 const NavMenu = lazy(() => import('@/components/NavMenu.jsx'));
 
@@ -14,11 +15,20 @@ const AppHeader = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const dispatch = useDispatch();
-	const onLogout = useCallback(() => {
-		// Implement logout logic here
-		dispatch(logout());
-		navigate('/login');
-	}, [dispatch, navigate]);
+	const refreshToken = useSelector(selectRefreshToken);
+	const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation();
+	const onLogout = useCallback(async () => {
+		try {
+			if (refreshToken) {
+				await logoutMutation(refreshToken).unwrap();
+			}
+		} catch (error) {
+			console.error('Logout failed:', error);
+		} finally {
+			dispatch(logout());
+			navigate('/login');
+		}
+	}, [dispatch, logoutMutation, navigate, refreshToken]);
 
 	const sectionName = useMemo(() => {
 		const path = location.pathname;
@@ -71,6 +81,7 @@ const AppHeader = () => {
 						'&:hover': { color: '#ffffff' },
 						color: 'rgb(206, 212, 218)' }
 					}
+					disabled={isLoggingOut}
 					onClick={onLogout}>Logout
 				</Button>
 			</Toolbar>
