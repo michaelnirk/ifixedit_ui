@@ -1,8 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+const isTestRuntime = Boolean(import.meta.env?.VITEST);
+const API_BASE_URL = isTestRuntime || typeof window === 'undefined' ? 'http://localhost/api' : '/api';
+
 // Base query with auth token handling for vehicles
 const baseQuery = fetchBaseQuery({
-	baseUrl: '/api',
+	baseUrl: API_BASE_URL,
 	prepareHeaders: (headers, { getState }) => {
 		// Get token from auth state
 		const token = getState().auth.token;

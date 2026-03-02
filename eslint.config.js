@@ -182,5 +182,19 @@ export default defineConfig([
 				version: 'detect'
 			}
 		}
+	},
+	{
+		files: ['**/*.spec.{js,jsx}', 'src/test/**/*.js'],
+		languageOptions: {
+			globals: {
+				afterAll: true,
+				afterEach: true,
+				beforeAll: true,
+				describe: true,
+				expect: true,
+				it: true,
+				vi: true
+			}
+		}
 	}
 ]);
