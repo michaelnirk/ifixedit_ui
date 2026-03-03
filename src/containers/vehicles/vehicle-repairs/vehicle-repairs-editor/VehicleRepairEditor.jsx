@@ -48,7 +48,7 @@ const VehicleRepairEditor = () => {
 			km_at_repair: '',
 			notes: [],
 			repair_cost: '',
-			repair_cost_currency: 10049, // Default to USD
+			repair_cost_currency: '10049', // Default to USD
 			repair_date: null,
 			repair_location: ''
 		}
