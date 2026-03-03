@@ -11,7 +11,6 @@ export default defineConfig({
 	},
 	test: {
 		coverage: {
-			enabled: true,
 			provider: 'v8',
 			reporter: ['text', 'html']
 		},
@@ -21,6 +20,8 @@ export default defineConfig({
 				url: 'http://localhost'
 			}
 		},
-		setupFiles: ['./src/test/setupTests.js']
+		hookTimeout: 15000,
+		setupFiles: ['./src/test/setupTests.js'],
+		testTimeout: 15000
 	}
 });

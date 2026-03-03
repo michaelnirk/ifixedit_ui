@@ -31,13 +31,19 @@ The script is at [scripts/deploy-pi.sh](scripts/deploy-pi.sh) and supports envir
 - `DEPLOY_DIR` (default: `/var/www/ifixedit_ui`)
 - `DIST_DIR` (default: `dist`)
 - `RUN_TESTS` (`true`/`false`, default: `true`)
+- `RUN_COVERAGE` (`true`/`false`, default: `false`)
 - `INSTALL_CMD` (default: `pnpm install --frozen-lockfile`)
 - `BUILD_CMD` (default: `pnpm build`)
 - `TEST_CMD` (default: `pnpm test`)
+- `COVERAGE_TEST_CMD` (default: `pnpm run test:coverage`)
 - `RESTART_CMD` (default: `sudo systemctl reload nginx`)
 
 Example override (skip tests + custom restart):
 
 `RUN_TESTS=false RESTART_CMD="sudo systemctl restart your-service" pnpm deploy:pi`
+
+Example override (run coverage tests before deploy):
+
+`RUN_COVERAGE=true pnpm deploy:pi`
 
 Note: the script fails if the repo has uncommitted changes, to prevent accidental overwrite during deploy.

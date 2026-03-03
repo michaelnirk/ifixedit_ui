@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import auth from '@/state/features/authSlice';
 import { rootApi } from '@/state/api/rootApi';
 import { server } from '@/test/msw/server';
@@ -237,6 +237,8 @@ describe('auth flow with refresh tokens', () => {
 	});
 
 	it('rejects listRepairs when required IDs are missing', async () => {
+		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+		});
 		const store = createTestStore();
 
 		await expect(
@@ -246,9 +248,13 @@ describe('auth flow with refresh tokens', () => {
 		await expect(
 			store.dispatch(rootApi.endpoints.listRepairs.initiate({ entityId: '', userId: 'user-1' })).unwrap()
 		).rejects.toThrow('Entity ID is required');
+
+		consoleErrorSpy.mockRestore();
 	});
 
 	it('rejects listRepairParts when required IDs are missing', async () => {
+		const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+		});
 		const store = createTestStore();
 
 		await expect(
@@ -258,5 +264,7 @@ describe('auth flow with refresh tokens', () => {
 		await expect(
 			store.dispatch(rootApi.endpoints.listRepairParts.initiate({ repairId: '', userId: 'user-1' })).unwrap()
 		).rejects.toThrow('Repair ID is required');
+
+		consoleErrorSpy.mockRestore();
 	});
 });

@@ -115,7 +115,7 @@ describe('VehiclesList', () => {
 		expect(screen.getByRole('progressbar')).toBeInTheDocument();
 	});
 
-	it('navigates to create route when Add Vehicle is clicked', () => {
+	it('navigates to create route when Add Vehicle is clicked', async () => {
 		renderVehiclesList({
 			auth: {
 				error: null,
@@ -126,12 +126,12 @@ describe('VehiclesList', () => {
 			}
 		});
 
-		fireEvent.click(screen.getByRole('button', { name: 'Add Vehicle' }));
+		fireEvent.click(await screen.findByRole('button', { name: 'Add Vehicle' }));
 
 		expect(mockNavigate).toHaveBeenCalledWith('create');
 	});
 
-	it('dispatches descending sort when clicking the active Name column', () => {
+	it('dispatches descending sort when clicking the active Name column', async () => {
 		const store = renderVehiclesList({
 			auth: {
 				error: null,
@@ -142,7 +142,7 @@ describe('VehiclesList', () => {
 			}
 		});
 
-		fireEvent.click(screen.getByRole('button', { name: 'Name' }));
+		fireEvent.click(await screen.findByRole('button', { name: 'Name' }));
 
 		expect(store.getState().vehiclesList.sortedBy).toEqual(setSortedBy({ direction: 'desc', field: 'name' }).payload);
 	});

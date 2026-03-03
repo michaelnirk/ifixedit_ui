@@ -1,6 +1,6 @@
 import React from 'react';
 import { configureStore } from '@reduxjs/toolkit';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
@@ -68,7 +68,7 @@ describe('validateLoginForm', () => {
 });
 
 describe('Login', () => {
-	it('prevents login request when required fields are empty', () => {
+	it('prevents login request when required fields are empty', async () => {
 		let loginRequestCount = 0;
 
 		server.use(
@@ -82,11 +82,13 @@ describe('Login', () => {
 		const usernameInput = screen.getByLabelText(/Username/i);
 		const passwordInput = screen.getByLabelText(/Password/i);
 
-		fireEvent.click(screen.getByRole('button', { name: 'Login' }));
+		fireEvent.click(await screen.findByRole('button', { name: 'Login' }));
 
 		expect(usernameInput).toBeRequired();
 		expect(passwordInput).toBeRequired();
-		expect(loginRequestCount).toBe(0);
+		await waitFor(() => {
+			expect(loginRequestCount).toBe(0);
+		});
 	});
 
 	it('prevents login request when username is empty', () => {

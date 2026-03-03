@@ -38,9 +38,11 @@ BRANCH="${BRANCH:-master}"
 DEPLOY_DIR="${DEPLOY_DIR:-/var/www/ifixedit_ui}"
 DIST_DIR="${DIST_DIR:-dist}"
 RUN_TESTS="${RUN_TESTS:-true}"
+RUN_COVERAGE="${RUN_COVERAGE:-false}"
 INSTALL_CMD="${INSTALL_CMD:-pnpm install --frozen-lockfile}"
 BUILD_CMD="${BUILD_CMD:-pnpm build}"
 TEST_CMD="${TEST_CMD:-pnpm test}"
+COVERAGE_TEST_CMD="${COVERAGE_TEST_CMD:-pnpm run test:coverage}"
 RESTART_CMD="${RESTART_CMD:-sudo systemctl reload nginx}"
 
 if [[ ! -d "$REPO_DIR/.git" ]]; then
@@ -64,8 +66,13 @@ log "Installing dependencies"
 eval "$INSTALL_CMD"
 
 if [[ "$RUN_TESTS" == "true" ]]; then
+	TEST_COMMAND="$TEST_CMD"
+	if [[ "$RUN_COVERAGE" == "true" ]]; then
+		TEST_COMMAND="$COVERAGE_TEST_CMD"
+	fi
+
 	log "Running tests"
-	eval "$TEST_CMD"
+	eval "$TEST_COMMAND"
 fi
 
 log "Building app"
