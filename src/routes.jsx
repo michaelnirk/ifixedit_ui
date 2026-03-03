@@ -5,7 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import ProtectedRoute from '@/components/ProtectedRoute.jsx';
 
 const AppLayout = lazy(() => import('@/components/app-layout/AppLayout.jsx'));
-const Login = lazy(() => import('@/containers/Login.jsx'));
+const Login = lazy(() => import('@/containers/login/Login.jsx'));
 const HomePage = lazy(() => import('@/containers/HomePage.jsx'));
 const VehiclesList = lazy(() => import('@/containers/vehicles/vehicles-list/VehiclesList.jsx'));
 const VehicleEditor = lazy(() => import('@/containers/vehicles/vehicle-editor/VehicleEditor.jsx'));

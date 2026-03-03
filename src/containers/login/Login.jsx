@@ -12,6 +12,7 @@ import Container from '@mui/material/Container';
 import { Login as LoginIcon } from '@mui/icons-material';
 import { rootApi, useLoginMutation } from '@/state/api/rootApi';
 import { selectAuth } from '@/state/features/authSlice';
+import { validateLoginForm } from '@/containers/login/loginValidation';
 
 const Login = () => {
 	const [formData, setFormData] = useState({
@@ -33,7 +34,6 @@ const Login = () => {
 			[name]: value
 		}));
 
-		// Clear field error when user starts typing
 		if (errors[name]) {
 			setErrors((prev) => ({
 				...prev,
@@ -43,22 +43,10 @@ const Login = () => {
 	};
 
 	const validateForm = () => {
-		const newErrors = {};
+		const validationErrors = validateLoginForm(formData);
 
-		if (!formData.username) {
-			newErrors.username = 'Username is required';
-		} else if (formData.username.length < 3) {
-			newErrors.username = 'Username must be at least 3 characters';
-		}
-
-		if (!formData.password) {
-			newErrors.password = 'Password is required';
-		} else if (formData.password.length < 6) {
-			newErrors.password = 'Password must be at least 6 characters';
-		}
-
-		setErrors(newErrors);
-		return Object.keys(newErrors).length === 0;
+		setErrors(validationErrors);
+		return Object.keys(validationErrors).length === 0;
 	};
 
 	const handleSubmit = async (e) => {
@@ -70,15 +58,12 @@ const Login = () => {
 
 		loginMutation(formData).unwrap().then((result) => {
 			if (result.accessToken) {
-				// Preload currencies and end items after login
 				dispatch(rootApi.endpoints.listCurrencies.initiate(result.user.user_id));
 				dispatch(rootApi.endpoints.listEndItems.initiate(result.user.user_id));
-				// Redirect to the intended page or home page after successful login
 				const from = location.state?.from?.pathname || '/vehicles';
 				navigate(from, { replace: true });
 			}
 		}).catch((error) => {
-			// Error is handled by RTK Query and auth slice
 			console.error('Login failed:', error);
 		});
 	};

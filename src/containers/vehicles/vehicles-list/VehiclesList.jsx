@@ -14,9 +14,10 @@ import Switch from '@mui/material/Switch';
 import { useListCurrenciesQuery, useListVehiclesQuery } from '@/state/api/rootApi';
 import { selectUserId } from '@/state/features/authSlice';
 import { selectSortedVehicleData } from '@/containers/vehicles/vehicles-list/selectors';
+import SearchInput from '@/components/SearchInput';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
-import { selectShowArchived, setShowArchived, selectSortedBy, setSortedBy } from './slice';
+import { selectShowArchived, setShowArchived, selectSortedBy, setSortedBy, selectSearchFilter, setSearchFilter } from './slice';
 import React, { useMemo, useCallback } from 'react';
 
 const fields = [
@@ -79,6 +80,7 @@ const VehiclesList = () => {
 	const navigate = useNavigate();
 	const userId = useSelector(selectUserId);
 	const vehicleData = useSelector(selectSortedVehicleData);
+	const searchFilter = useSelector(selectSearchFilter);
 	const showArchived = useSelector(selectShowArchived);
 	const sortedBy = useSelector(selectSortedBy);
 
@@ -108,14 +110,20 @@ const VehiclesList = () => {
 	}, [dispatch, sortedBy]);
 
 	const headerContent = useMemo(() => (
-		<Button
-			sx={{ borderRadius: '25px' }}
-			variant="contained"
-			startIcon={<Add />}
-			onClick={() => navigate('create')}>
-			Add Vehicle
-		</Button>
-	), [navigate]);
+		<div style={{ alignItems: 'center', display: 'flex', gap: '16px' }}>
+			<SearchInput
+				placeholderText="Search vehicles"
+				searchTerm={searchFilter}
+				onChange={(e) => dispatch(setSearchFilter(e.target.value))} />
+			<Button
+				sx={{ borderRadius: '25px' }}
+				variant="contained"
+				startIcon={<Add />}
+				onClick={() => navigate('create')}>
+				Add Vehicle
+			</Button>
+		</div>
+	), [searchFilter, dispatch, navigate]);
 
 	const tableRows = useMemo(() => {
 		return vehicleData.map((vehicle) => (
