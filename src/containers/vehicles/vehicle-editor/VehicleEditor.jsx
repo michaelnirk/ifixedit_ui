@@ -25,6 +25,7 @@ import { useListCurrenciesQuery,
 import { useNotes } from '@/useNotes.jsx';
 import { useEditorLifecycle } from '@/containers/shared/useEditorLifecycle';
 import { formatDateTimeOrNull } from '@/utils/date';
+import { sanitizeNotesForPayload } from '@/utils/notes';
 import SchemaFormSection from '@/components/editors/SchemaFormSection';
 
 const defaultVehicle = {
@@ -39,7 +40,6 @@ const defaultVehicle = {
 	notes: [],
 	purchase_currency: 10049, // Default to USD
 	purchase_price: '',
-	vehicle_id: '',
 	vin: '',
 	year: ''
 };
@@ -92,7 +92,6 @@ const VehicleEditor = () => {
 	// Populate form when vehicle data is loaded (edit mode)
 	useEffect(() => {
 		if (vehicle) {
-			methods.setValue('vehicle_id', vehicle.vehicle_id || '');
 			methods.setValue('name', vehicle.name || '');
 			methods.setValue('year', vehicle.year || '');
 			methods.setValue('make', vehicle.make || '');
@@ -117,7 +116,8 @@ const VehicleEditor = () => {
 		try {
 			const dataToSubmit = {
 				...vehicleData,
-				date_purchased: formatDateTimeOrNull(vehicleData.date_purchased)
+				date_purchased: formatDateTimeOrNull(vehicleData.date_purchased),
+				notes: sanitizeNotesForPayload(vehicleData.notes)
 			};
 
 			if (vehicleId) {

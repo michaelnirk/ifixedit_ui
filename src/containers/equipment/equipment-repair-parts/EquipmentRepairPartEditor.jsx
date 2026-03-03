@@ -21,6 +21,7 @@ import RepairPartFields from '@/components/editors/RepairPartFields';
 import { REPAIR_PART_EDITOR_CONFIG } from '@/containers/shared/repairEditorConfig';
 import { useEditorLifecycle } from '@/containers/shared/useEditorLifecycle';
 import { formatDateTimeOrNull } from '@/utils/date';
+import { sanitizeNotesForPayload } from '@/utils/notes';
 
 const EquipmentRepairPartEditor = () => {
 	const editorConfig = REPAIR_PART_EDITOR_CONFIG.equipment;
@@ -48,7 +49,6 @@ const EquipmentRepairPartEditor = () => {
 			notes: [],
 			part_cost: '',
 			part_cost_currency: 10049, // Default to USD
-			part_id: null,
 			part_number: '',
 			purchase_date: null,
 			qty: '',
@@ -64,7 +64,6 @@ const EquipmentRepairPartEditor = () => {
 	// Populate form when repair data is loaded (edit mode)
 	useEffect(() => {
 		if (repairPart && partId) {
-			setValue('part_id', repairPart.part_id || null);
 			setValue('repair_id', repairId);
 			setValue('brand', repairPart.brand || '');
 			setValue('description', repairPart.description || '');
@@ -82,6 +81,7 @@ const EquipmentRepairPartEditor = () => {
 		try {
 			const dataToSubmit = {
 				...repairPartData,
+				notes: sanitizeNotesForPayload(repairPartData.notes),
 				purchase_date: formatDateTimeOrNull(repairPartData.purchase_date)
 			};
 

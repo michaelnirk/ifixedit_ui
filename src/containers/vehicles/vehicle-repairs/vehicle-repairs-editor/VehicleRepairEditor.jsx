@@ -20,6 +20,7 @@ import EditorDialogShell from '@/components/editors/EditorDialogShell';
 import { REPAIR_EDITOR_CONFIG } from '@/containers/shared/repairEditorConfig';
 import { useEditorLifecycle } from '@/containers/shared/useEditorLifecycle';
 import { formatDateTimeOrNull } from '@/utils/date';
+import { sanitizeNotesForPayload } from '@/utils/notes';
 
 const VehicleRepairEditor = () => {
 	const editorConfig = REPAIR_EDITOR_CONFIG.vehicle;
@@ -49,7 +50,6 @@ const VehicleRepairEditor = () => {
 			repair_cost: '',
 			repair_cost_currency: 10049, // Default to USD
 			repair_date: null,
-			repair_id: '',
 			repair_location: ''
 		}
 	});
@@ -62,7 +62,6 @@ const VehicleRepairEditor = () => {
 	useEffect(() => {
 		if (repair && repairId) {
 			setValue('end_item_id', repair.end_item_id);
-			setValue('repair_id', repair.repair_id);
 			setValue('description', repair.description);
 			setValue('repair_location', repair.repair_location || '');
 			setValue('repair_date', repair.repair_date ? dayjs(repair.repair_date) : null);
@@ -78,6 +77,7 @@ const VehicleRepairEditor = () => {
 			const dataToSubmit = {
 				...repairData,
 				end_item_id: vehicleId,
+				notes: sanitizeNotesForPayload(repairData.notes),
 				repair_date: formatDateTimeOrNull(repairData.repair_date)
 			};
 

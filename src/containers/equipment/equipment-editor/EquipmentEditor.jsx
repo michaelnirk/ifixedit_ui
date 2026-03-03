@@ -27,6 +27,7 @@ import {
 import { useNotes } from '@/useNotes.jsx';
 import { useEditorLifecycle } from '@/containers/shared/useEditorLifecycle';
 import { formatDateTimeOrNull } from '@/utils/date';
+import { sanitizeNotesForPayload } from '@/utils/notes';
 import SchemaFormSection from '@/components/editors/SchemaFormSection';
 
 const defaultEquipment = {
@@ -36,7 +37,6 @@ const defaultEquipment = {
 	// Default to USD
 	cost_currency: 10049,
 	description: '',
-	equipment_id: '',
 	name: '',
 	notes: []
 };
@@ -82,7 +82,6 @@ const EquipmentEditor = () => {
 	// Populate form when vehicle data is loaded (edit mode)
 	useEffect(() => {
 		if (equipment) {
-			methods.setValue('equipment_id', equipment.equipment_id || '');
 			methods.setValue('description', equipment.description || '');
 			methods.setValue('acquisition_date', equipment.acquisition_date ? dayjs(equipment.acquisition_date) : null);
 			methods.setValue('name', equipment.name || '');
@@ -97,7 +96,8 @@ const EquipmentEditor = () => {
 		try {
 			const dataToSubmit = {
 				...equipmentData,
-				acquisition_date: formatDateTimeOrNull(equipmentData.acquisition_date)
+				acquisition_date: formatDateTimeOrNull(equipmentData.acquisition_date),
+				notes: sanitizeNotesForPayload(equipmentData.notes)
 			};
 
 			if (equipmentId) {

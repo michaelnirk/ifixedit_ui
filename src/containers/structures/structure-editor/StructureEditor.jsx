@@ -27,6 +27,7 @@ import {
 import { useNotes } from '@/useNotes.jsx';
 import { useEditorLifecycle } from '@/containers/shared/useEditorLifecycle';
 import { formatDateTimeOrNull } from '@/utils/date';
+import { sanitizeNotesForPayload } from '@/utils/notes';
 import SchemaFormSection from '@/components/editors/SchemaFormSection';
 
 const defaultStructure = {
@@ -37,8 +38,7 @@ const defaultStructure = {
 	description: '',
 	how_acquired: '',
 	name: '',
-	notes: [], // Default to USD
-	structure_id: ''
+	notes: [] // Default to USD
 };
 
 const STRUCTURE_FORM_ROWS = [
@@ -87,7 +87,6 @@ const StructureEditor = () => {
 	// Populate form when vehicle data is loaded (edit mode)
 	useEffect(() => {
 		if (structure) {
-			methods.setValue('structure_id', structure.structure_id || '');
 			methods.setValue('name', structure.name || '');
 			methods.setValue('description', structure.description || '');
 			methods.setValue('acquisition_date', structure.acquisition_date ? dayjs(structure.acquisition_date) : null);
@@ -103,7 +102,8 @@ const StructureEditor = () => {
 		try {
 			const dataToSubmit = {
 				...structureData,
-				acquisition_date: formatDateTimeOrNull(structureData.acquisition_date)
+				acquisition_date: formatDateTimeOrNull(structureData.acquisition_date),
+				notes: sanitizeNotesForPayload(structureData.notes)
 			};
 
 			if (structureId) {
