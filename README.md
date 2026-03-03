@@ -10,3 +10,34 @@ Currently, two official plugins are available:
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## Deploy on Raspberry Pi
+
+You can deploy directly on the Pi with:
+
+`pnpm deploy:pi`
+
+This script will:
+
+- pull the latest code from `origin/master`
+- install dependencies
+- build the app
+- copy `dist/` to `/var/www/ifixedit_ui`
+
+The script is at [scripts/deploy-pi.sh](scripts/deploy-pi.sh) and supports environment overrides:
+
+- `REPO_DIR` (default: repo root)
+- `BRANCH` (default: `master`)
+- `DEPLOY_DIR` (default: `/var/www/ifixedit_ui`)
+- `DIST_DIR` (default: `dist`)
+- `RUN_TESTS` (`true`/`false`, default: `true`)
+- `INSTALL_CMD` (default: `pnpm install --frozen-lockfile`)
+- `BUILD_CMD` (default: `pnpm build`)
+- `TEST_CMD` (default: `pnpm test`)
+- `RESTART_CMD` (default: `sudo systemctl reload nginx`)
+
+Example override (skip tests + custom restart):
+
+`RUN_TESTS=false RESTART_CMD="sudo systemctl restart your-service" pnpm deploy:pi`
+
+Note: the script fails if the repo has uncommitted changes, to prevent accidental overwrite during deploy.
