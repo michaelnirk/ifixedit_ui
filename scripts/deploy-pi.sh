@@ -14,6 +14,21 @@ require_cmd() {
 	command -v "$1" >/dev/null 2>&1 || fail "Missing required command: $1"
 }
 
+ensure_git_safe_directory() {
+	if git status --porcelain >/dev/null 2>&1; then
+		return
+	fi
+
+	local existing_safe_dirs
+	existing_safe_dirs="$(git config --global --get-all safe.directory 2>/dev/null || true)"
+	if ! printf '%s\n' "$existing_safe_dirs" | grep -Fxq "$REPO_DIR"; then
+		log "Adding git safe.directory for '$REPO_DIR'"
+		git config --global --add safe.directory "$REPO_DIR" || fail "Unable to add git safe.directory. Run: git config --global --add safe.directory $REPO_DIR"
+	fi
+
+	git status --porcelain >/dev/null 2>&1 || fail "Git still cannot access repository safely. Verify ownership/permissions for $REPO_DIR"
+}
+
 require_cmd git
 require_cmd pnpm
 
@@ -33,6 +48,8 @@ if [[ ! -d "$REPO_DIR/.git" ]]; then
 fi
 
 cd "$REPO_DIR"
+
+ensure_git_safe_directory
 
 if [[ -n "$(git status --porcelain)" ]]; then
 	fail "Working tree has uncommitted changes. Commit/stash before deploying."
