@@ -34,6 +34,7 @@ The script is at [scripts/deploy-pi.sh](scripts/deploy-pi.sh) and supports envir
 - `RUN_COVERAGE` (`true`/`false`, default: `false`)
 - `INSTALL_CMD` (default: `pnpm install --frozen-lockfile`)
 - `BUILD_CMD` (default: `pnpm build`)
+- `BUILD_NODE_OPTIONS` (default: `--max-old-space-size=1024`, set empty to disable)
 - `TEST_CMD` (default: `pnpm test`)
 - `COVERAGE_TEST_CMD` (default: `pnpm run test:coverage`)
 - `RESTART_CMD` (default: `sudo systemctl reload nginx`)
@@ -45,5 +46,9 @@ Example override (skip tests + custom restart):
 Example override (run coverage tests before deploy):
 
 `RUN_COVERAGE=true pnpm deploy:pi`
+
+If the Pi runs out of memory during `vite build`, increase heap for that run:
+
+`BUILD_NODE_OPTIONS="--max-old-space-size=1536" pnpm deploy:pi`
 
 Note: the script fails if the repo has uncommitted changes, to prevent accidental overwrite during deploy.

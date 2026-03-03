@@ -41,6 +41,7 @@ RUN_TESTS="${RUN_TESTS:-true}"
 RUN_COVERAGE="${RUN_COVERAGE:-false}"
 INSTALL_CMD="${INSTALL_CMD:-pnpm install --frozen-lockfile}"
 BUILD_CMD="${BUILD_CMD:-pnpm build}"
+BUILD_NODE_OPTIONS="${BUILD_NODE_OPTIONS:---max-old-space-size=1024}"
 TEST_CMD="${TEST_CMD:-pnpm test}"
 COVERAGE_TEST_CMD="${COVERAGE_TEST_CMD:-pnpm run test:coverage}"
 RESTART_CMD="${RESTART_CMD:-sudo systemctl reload nginx}"
@@ -75,8 +76,20 @@ if [[ "$RUN_TESTS" == "true" ]]; then
 	eval "$TEST_COMMAND"
 fi
 
-log "Building app"
-eval "$BUILD_CMD"
+if [[ -n "$BUILD_NODE_OPTIONS" ]]; then
+	COMBINED_NODE_OPTIONS="${NODE_OPTIONS:-}"
+	if [[ -n "$COMBINED_NODE_OPTIONS" ]]; then
+		COMBINED_NODE_OPTIONS="$COMBINED_NODE_OPTIONS $BUILD_NODE_OPTIONS"
+	else
+		COMBINED_NODE_OPTIONS="$BUILD_NODE_OPTIONS"
+	fi
+
+	log "Building app with Node heap options"
+	NODE_OPTIONS="$COMBINED_NODE_OPTIONS" eval "$BUILD_CMD"
+else
+	log "Building app"
+	eval "$BUILD_CMD"
+fi
 
 if [[ ! -d "$DIST_DIR" ]]; then
 	fail "Build output directory not found: $DIST_DIR"
