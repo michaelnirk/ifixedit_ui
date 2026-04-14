@@ -29,7 +29,20 @@ const NotFoundPage = lazy(() => import('@/containers/NotFoundPage.jsx'));
 
 const RouteLoader = () => (
 	<Box
-		sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', minHeight: '40vh' }}>
+		sx={
+			{
+				alignItems: 'center',
+				backgroundColor: 'rgba(255, 255, 255, 0.8)',
+				bottom: 0,
+				display: 'flex',
+				justifyContent: 'center',
+				left: 0,
+				position: 'absolute',
+				right: 0,
+				top: 0,
+				zIndex: 1000
+			}
+		}>
 		<CircularProgress />
 	</Box>
 );
