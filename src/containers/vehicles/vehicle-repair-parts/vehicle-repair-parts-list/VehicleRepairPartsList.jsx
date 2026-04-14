@@ -1,8 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Outlet, useParams } from 'react-router-dom';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Add from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
@@ -19,7 +17,7 @@ import { selectUserId } from '@/state/features/authSlice';
 import React, { useMemo, useCallback } from 'react';
 import { useConfirm } from 'material-ui-confirm';
 import { selectSortedVehicleRepairPartsData } from './selectors';
-import { selectSortedBy, setSortedBy } from './slice';
+import { selectSortedBy, setSortedBy, selectSearchFilter, setSearchFilter } from './slice';
 
 const fields = [
 	{
@@ -71,16 +69,7 @@ const VehicleRepairPartsList = () => {
 	const selectRepairParts = useMemo(() => selectSortedVehicleRepairPartsData(repairId), [repairId]);
 	const repairPartsData = useSelector(selectRepairParts);
 	const sortedBy = useSelector(selectSortedBy);
-
-	const headerContent = useMemo(() => (
-		<Button
-			sx={{ borderRadius: '25px' }}
-			variant="contained"
-			startIcon={<Add />}
-			onClick={() => navigate('create')}>
-			Add Repair Part
-		</Button>
-	), [navigate]);
+	const searchFilter = useSelector(selectSearchFilter);
 
 	// RTK Query hooks
 	const { isLoading, isError: isRepairPartsError } = useListRepairPartsQuery({ repairId, userId }, {
@@ -164,9 +153,13 @@ const VehicleRepairPartsList = () => {
 			<>
 				<Outlet />
 				<PageLayout>
-					<ListHeaderLayout titleText="Repair Parts">
-						{headerContent}
-					</ListHeaderLayout>
+					<ListHeaderLayout
+						titleText="Repair Parts"
+						buttonText="Add Repair Part"
+						searchPlaceholderText="Search Repair Parts"
+						searchFilter={searchFilter}
+						onSearchInput={(value) => dispatch(setSearchFilter(value))}
+						onButtonClick={() => navigate('create')} />
 					<DataTable
 						fields={fields}
 						onSortChange={onSortChange}

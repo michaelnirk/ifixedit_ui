@@ -48,7 +48,7 @@ const StructureRepairPartEditor = () => {
 			description: '',
 			notes: [],
 			part_cost: '',
-			part_cost_currency: 10049, // Default to USD
+			part_cost_currency: '10049', // Default to USD
 			part_number: '',
 			purchase_date: null,
 			qty: '',

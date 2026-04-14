@@ -50,7 +50,7 @@ const StructureRow = ({ structure, currencies = [], acquisitionMethods, onEdit, 
 						<Tooltip
 							arrow
 							placement="top"
-							title={`View Repairs for ${structure.description}`}>
+							title={`View Repairs for ${structure.name}`}>
 							<IconButton
 								onClick={() => onShowRepairs(structure.structure_id)}
 								size="small">

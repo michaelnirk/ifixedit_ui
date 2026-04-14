@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import { rootApi } from '@/state/api/rootApi';
 import { selectUserId } from '@/state/features/authSlice';
 import { sortItems } from '@/utils/sort';
-import { selectSortedBy } from './slice';
+import { selectSearchFilter, selectSortedBy } from './slice';
 
 // Selector factory that creates a selector for a specific structure repair's parts
 export const selectStructureRepairPartsData = (repairId) => createSelector(
@@ -21,10 +21,24 @@ export const selectStructureRepairPartsData = (repairId) => createSelector(
 	}
 );
 
-export const selectSortedStructureRepairPartsData = (repairId) => createSelector(
+const filteredRepairParts = (repairId) => createSelector(
 	selectStructureRepairPartsData(repairId),
+	selectSearchFilter,
+	(repairs, searchFilter) => {
+		if (!searchFilter) {
+			return repairs;
+		}
+		const keys = ['description', 'part_number', 'source', 'brand'];
+		return repairs.filter((repair) =>
+			keys.some((key) => repair[key]?.toLowerCase().includes(searchFilter.toLowerCase()))
+		);
+	}
+);
+
+export const selectSortedStructureRepairPartsData = (repairId) => createSelector(
+	filteredRepairParts(repairId),
 	selectSortedBy,
-	(repairs, sortedBy) => {
-		return sortItems(repairs, sortedBy);
+	(repairParts, sortedBy) => {
+		return sortItems(repairParts, sortedBy);
 	}
 );

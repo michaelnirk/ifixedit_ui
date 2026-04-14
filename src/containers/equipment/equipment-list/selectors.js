@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { rootApi } from '@/state/api/rootApi';
-import { selectShowArchived, selectSortedBy } from '@/containers/equipment/equipment-list/slice';
+import { selectShowArchived, selectSortedBy, selectSearchFilter } from '@/containers/equipment/equipment-list/slice';
 import { selectUserId } from '@/state/features/authSlice';
 import { sortItems } from '@/utils/sort';
 
@@ -31,8 +31,22 @@ export const selectArchivedFilteredEquipment = createSelector(
 	}
 );
 
-export const selectSortedEquipmentData = createSelector(
+const filteredEquipment = createSelector(
 	selectArchivedFilteredEquipment,
+	selectSearchFilter,
+	(equipment, searchFilter) => {
+		if (!searchFilter) {
+			return equipment;
+		}
+		const keys = ['name', 'description'];
+		return equipment.filter((item) =>
+			keys.some((key) => item[key]?.toLowerCase().includes(searchFilter.toLowerCase()))
+		);
+	}
+);
+
+export const selectSortedEquipmentData = createSelector(
+	filteredEquipment,
 	selectSortedBy,
 	(equipment, sortedBy) => {
 		return sortItems(equipment, sortedBy);

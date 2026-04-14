@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import { rootApi } from '@/state/api/rootApi';
 import { selectUserId } from '@/state/features/authSlice';
 import { sortItems } from '@/utils/sort';
-import { selectSearchTerm, selectSortedBy } from './slice';
+import { selectSearchFilter, selectSortedBy } from './slice';
 
 // Selector factory that creates a selector for a specific structure's repairs
 export const selectStructureRepairsData = (structureId) => createSelector(
@@ -23,14 +23,31 @@ export const selectStructureRepairsData = (structureId) => createSelector(
 
 const filteredRepairs = (structureId) => createSelector(
 	selectStructureRepairsData(structureId),
-	selectSearchTerm,
-	(repairs, searchTerm) => {
-		if (!searchTerm) {
+	selectSearchFilter,
+	(repairs, searchFilter) => {
+		if (!searchFilter) {
 			return repairs;
 		}
-		return repairs.filter((repair) => repair.description.toLowerCase().includes(searchTerm.toLowerCase()));
+		const keys = ['description', 'repair_location'];
+		return repairs.filter((repair) =>
+			keys.some((key) => repair[key]?.toLowerCase().includes(searchFilter.toLowerCase()))
+		);
 	}
 );
+
+// const filteredRepairs = (vehicleId) => createSelector(
+// 	selectVehicleRepairsData(vehicleId),
+// 	selectSearchFilter,
+// 	(repairs, searchTerm) => {
+// 		if (!searchTerm) {
+// 			return repairs;
+// 		}
+// 		const keys = ['description', 'repair_location'];
+// 		return repairs.filter((repair) =>
+// 			keys.some((key) => repair[key]?.toLowerCase().includes(searchTerm.toLowerCase()))
+// 		);
+// 	}
+// );
 
 export const selectSortedStructureRepairsData = (structureId) => createSelector(
 	filteredRepairs(structureId),

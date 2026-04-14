@@ -1,8 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet } from 'react-router-dom';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import { Add } from '@mui/icons-material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
@@ -16,7 +14,7 @@ import { selectUserId } from '@/state/features/authSlice';
 import { selectSortedEquipmentData } from '@/containers/equipment/equipment-list/selectors';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
-import { selectShowArchived, setShowArchived, selectSortedBy, setSortedBy } from './slice';
+import { selectShowArchived, setShowArchived, selectSortedBy, setSortedBy, selectSearchFilter, setSearchFilter } from './slice';
 import React, { useMemo, useCallback } from 'react';
 
 const fields = [
@@ -51,6 +49,7 @@ const EquipmentList = () => {
 	const equipment = useSelector(selectSortedEquipmentData);
 	const showArchived = useSelector(selectShowArchived);
 	const sortedBy = useSelector(selectSortedBy);
+	const searchFilter = useSelector(selectSearchFilter);
 
 	// RTK Query hooks
 	const { isLoading, isError: isEquipmentError } = useListEquipmentQuery(userId, {
@@ -76,16 +75,6 @@ const EquipmentList = () => {
 		}
 		dispatch(setSortedBy({ direction, field }));
 	}, [dispatch, sortedBy]);
-
-	const headerContent = useMemo(() => (
-		<Button
-			sx={{ borderRadius: '25px' }}
-			variant="contained"
-			startIcon={<Add />}
-			onClick={() => navigate('create')}>
-			Add Equipment Item
-		</Button>
-	), [navigate]);
 
 	const tableRows = useMemo(() => {
 		return equipment.map((equipmentItem) => (
@@ -146,9 +135,11 @@ const EquipmentList = () => {
 				<PageLayout>
 					<ListHeaderLayout
 						additionalContent={showArchivedButton}
-						titleText="Equipment">
-						{headerContent}
-					</ListHeaderLayout>
+						titleText="Equipment"
+						buttonText="Add Equipment Item"
+						searchPlaceholderText="Search Equipment"
+						searchFilter={searchFilter}
+						onSearchInput={(value) => dispatch(setSearchFilter(value))} />
 					<DataTable
 						fields={fields}
 						rows={tableRows}

@@ -2,13 +2,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet, useParams } from 'react-router-dom';
 import { showNotification } from '@/state/features/notificationSlice';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Add from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
 import StructureRepairRow from '@/components/table/StructureRepairRow';
-import SearchInput from '@/components/SearchInput';
 import {
 	useListRepairsQuery,
 	useDeleteRepairMutation,
@@ -21,7 +18,7 @@ import { selectUserId } from '@/state/features/authSlice';
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { useConfirm } from 'material-ui-confirm';
 import { selectSortedStructureRepairsData } from './selectors';
-import { selectSearchTerm, selectSortedBy, setSearchTerm, setSortedBy } from './slice';
+import { selectSearchFilter, selectSortedBy, setSearchFilter, setSortedBy } from './slice';
 
 const fields = [
 	{
@@ -57,12 +54,12 @@ const StructureRepairsList = () => {
 	const selectRepairs = useMemo(() => selectSortedStructureRepairsData(structureId), [structureId]);
 	const repairsData = useSelector(selectRepairs);
 	const sortedBy = useSelector(selectSortedBy);
-	const searchTerm = useSelector(selectSearchTerm);
+	const searchFilter = useSelector(selectSearchFilter);
 	const confirm = useConfirm();
 
 	useEffect(() => {
 		return () => {
-			dispatch(setSearchTerm(''));
+			dispatch(setSearchFilter(''));
 			dispatch(setSortedBy({ direction: 'desc', field: 'repair_date' }));
 		};
 	}, [dispatch]);
@@ -132,22 +129,6 @@ const StructureRepairsList = () => {
 		return structureData ? `Repairs for ${structureData.name}` : 'Repairs';
 	}, [structureData]);
 
-	const headerContent = useMemo(() => (
-		<div style={{ alignItems: 'center', display: 'flex', gap: '16px' }}>
-			<SearchInput
-				placeholderText="Search repairs"
-				searchTerm={searchTerm}
-				onChange={(e) => dispatch(setSearchTerm(e.target.value))} />
-			<Button
-				sx={{ borderRadius: '25px' }}
-				variant="contained"
-				startIcon={<Add />}
-				onClick={() => navigate('create')}>
-				Add Repair
-			</Button>
-		</div>
-	), [searchTerm, dispatch, navigate]);
-
 	if (!userId || !structureId) {
 		return <Alert severity="warning">Please log in and select a structure to view repairs.</Alert>;
 	}
@@ -173,9 +154,13 @@ const StructureRepairsList = () => {
 			<>
 				<Outlet />
 				<PageLayout>
-					<ListHeaderLayout titleText={pageTitle}>
-						{headerContent}
-					</ListHeaderLayout>
+					<ListHeaderLayout
+						titleText={pageTitle}
+						searchPlaceholderText="Search Repairs"
+						searchFilter={searchFilter}
+						onSearchInput={(value) => dispatch(setSearchFilter(value))}
+						onButtonClick={() => navigate('create')}
+						buttonText="Add Repair" />
 					<DataTable
 						fields={fields}
 						rows={tableRows}

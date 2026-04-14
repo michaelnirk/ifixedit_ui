@@ -1,8 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet } from 'react-router-dom';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Add from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
@@ -14,7 +12,6 @@ import Switch from '@mui/material/Switch';
 import { useListCurrenciesQuery, useListVehiclesQuery } from '@/state/api/rootApi';
 import { selectUserId } from '@/state/features/authSlice';
 import { selectSortedVehicleData } from '@/containers/vehicles/vehicles-list/selectors';
-import SearchInput from '@/components/SearchInput';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
 import { selectShowArchived, setShowArchived, selectSortedBy, setSortedBy, selectSearchFilter, setSearchFilter } from './slice';
@@ -109,22 +106,6 @@ const VehiclesList = () => {
 		dispatch(setSortedBy({ direction, field }));
 	}, [dispatch, sortedBy]);
 
-	const headerContent = useMemo(() => (
-		<div style={{ alignItems: 'center', display: 'flex', gap: '16px' }}>
-			<SearchInput
-				placeholderText="Search vehicles"
-				searchTerm={searchFilter}
-				onChange={(e) => dispatch(setSearchFilter(e.target.value))} />
-			<Button
-				sx={{ borderRadius: '25px' }}
-				variant="contained"
-				startIcon={<Add />}
-				onClick={() => navigate('create')}>
-				Add Vehicle
-			</Button>
-		</div>
-	), [searchFilter, dispatch, navigate]);
-
 	const tableRows = useMemo(() => {
 		return vehicleData.map((vehicle) => (
 			<VehicleRow
@@ -184,9 +165,12 @@ const VehiclesList = () => {
 				<PageLayout>
 					<ListHeaderLayout
 						additionalContent={showArchivedButton}
-						titleText="Vehicles">
-						{headerContent}
-					</ListHeaderLayout>
+						buttonText="Add Vehicle"
+						titleText="Vehicles"
+						searchPlaceholderText="Search Vehicles"
+						searchFilter={searchFilter}
+						onSearchInput={(value) => dispatch(setSearchFilter(value))}
+						onButtonClick={() => navigate('create')} />
 					<DataTable
 						fields={fields}
 						onSortChange={onSortChange}

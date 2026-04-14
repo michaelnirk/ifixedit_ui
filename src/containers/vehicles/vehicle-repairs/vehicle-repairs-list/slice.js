@@ -12,7 +12,7 @@ const slice = createSlice({
 	initialState,
 	name: 'vehicleRepairsList',
 	reducers: {
-		setSearchTerm(state, action) {
+		setSearchFilter(state, action) {
 			state.searchTerm = action.payload;
 		},
 		setSortedBy(state, action) {
@@ -20,11 +20,11 @@ const slice = createSlice({
 		}
 	},
 	selectors: {
-		selectSearchTerm: (state) => state.searchTerm,
+		selectSearchFilter: (state) => state.searchTerm,
 		selectSortedBy: (state) => state.sortedBy
 	}
 });
 
 export default slice;
-export const { setSortedBy, setSearchTerm } = slice.actions;
-export const { selectSortedBy, selectSearchTerm } = slice.selectors;
+export const { setSortedBy, setSearchFilter } = slice.actions;
+export const { selectSortedBy, selectSearchFilter } = slice.selectors;

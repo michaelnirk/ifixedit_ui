@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import { rootApi } from '@/state/api/rootApi';
 import { selectUserId } from '@/state/features/authSlice';
 import { sortItems } from '@/utils/sort';
-import { selectSearchTerm, selectSortedBy } from './slice';
+import { selectSearchFilter, selectSortedBy } from './slice';
 
 // Selector factory that creates a selector for a specific vehicle's repairs
 export const selectVehicleRepairsData = (vehicleId) => createSelector(
@@ -22,14 +22,14 @@ export const selectVehicleRepairsData = (vehicleId) => createSelector(
 
 const filteredRepairs = (vehicleId) => createSelector(
 	selectVehicleRepairsData(vehicleId),
-	selectSearchTerm,
+	selectSearchFilter,
 	(repairs, searchTerm) => {
 		if (!searchTerm) {
 			return repairs;
 		}
+		const keys = ['description', 'repair_location'];
 		return repairs.filter((repair) =>
-			repair.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			repair.repair_location?.toLowerCase().includes(searchTerm.toLowerCase())
+			keys.some((key) => repair[key]?.toLowerCase().includes(searchTerm.toLowerCase()))
 		);
 	}
 );

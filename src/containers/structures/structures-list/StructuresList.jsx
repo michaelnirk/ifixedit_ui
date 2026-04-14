@@ -1,8 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet } from 'react-router-dom';
-import { Add } from '@mui/icons-material';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
@@ -15,7 +13,7 @@ import { selectUserId } from '@/state/features/authSlice';
 import { selectSortedStructureData } from '@/containers/structures/structures-list/selectors';
 import ListHeaderLayout from '@/components/ListHeaderLayout.jsx';
 import PageLayout from '@/components/PageLayout.jsx';
-import { selectShowArchived, setShowArchived, selectSortedBy, setSortedBy } from './slice';
+import { selectShowArchived, setSearchFilter, setShowArchived, selectSearchFilter, selectSortedBy, setSortedBy } from './slice';
 import { showNotification } from '@/state/features/notificationSlice';
 import React, { useMemo, useCallback } from 'react';
 
@@ -56,6 +54,7 @@ const StructuresList = () => {
 	const structures = useSelector(selectSortedStructureData);
 	const showArchived = useSelector(selectShowArchived);
 	const sortedBy = useSelector(selectSortedBy);
+	const searchFilter = useSelector(selectSearchFilter);
 
 	// RTK Query hooks
 	const { isLoading, isError: isStructuresError } = useListStructuresQuery(userId, {
@@ -85,16 +84,6 @@ const StructuresList = () => {
 		}
 		dispatch(setSortedBy({ direction, field }));
 	}, [dispatch, sortedBy]);
-
-	const headerContent = useMemo(() => (
-		<Button
-			sx={{ borderRadius: '25px' }}
-			variant="contained"
-			startIcon={<Add />}
-			onClick={() => navigate('create')}>
-			Add Structure
-		</Button>
-	), [navigate]);
 
 	const tableRows = useMemo(() => {
 		return structures.map((structure) => (
@@ -156,9 +145,12 @@ const StructuresList = () => {
 				<PageLayout>
 					<ListHeaderLayout
 						additionalContent={showArchivedButton}
-						titleText="Structures">
-						{headerContent}
-					</ListHeaderLayout>
+						titleText="Structures"
+						searchPlaceholderText="Search Structures"
+						searchFilter={searchFilter}
+						onSearchInput={(value) => dispatch(setSearchFilter(value))}
+						onButtonClick={() => navigate('create')}
+						buttonText="Add Structure" />
 					<DataTable
 						fields={fields}
 						rows={tableRows}

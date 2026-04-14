@@ -2,8 +2,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Outlet, useParams } from 'react-router-dom';
 import { showNotification } from '@/state/features/notificationSlice';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import { Add } from '@mui/icons-material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DataTable from '@/components/table/DataTable';
@@ -19,7 +17,7 @@ import { selectUserId } from '@/state/features/authSlice';
 import React, { useMemo, useCallback } from 'react';
 import { useConfirm } from 'material-ui-confirm';
 import { selectSortedEquipmentRepairPartsData } from './selectors';
-import { selectSortedBy, setSortedBy } from './slice';
+import { selectSortedBy, setSortedBy, selectSearchFilter, setSearchFilter } from './slice';
 
 const fields = [
 	{
@@ -71,6 +69,7 @@ const EquipmentRepairPartsList = () => {
 	const selectRepairParts = useMemo(() => selectSortedEquipmentRepairPartsData(repairId), [repairId]);
 	const repairPartsData = useSelector(selectRepairParts);
 	const sortedBy = useSelector(selectSortedBy);
+	const searchFilter = useSelector(selectSearchFilter);
 
 	// RTK Query hooks
 	const { isLoading, isError: isRepairPartsError } = useListRepairPartsQuery({ repairId, userId }, {
@@ -117,16 +116,6 @@ const EquipmentRepairPartsList = () => {
 		}
 	}, [confirm, deleteRepairPart, userId, dispatch]);
 
-	const headerContent = useMemo(() => (
-		<Button
-			sx={{ borderRadius: '25px' }}
-			variant="contained"
-			startIcon={<Add />}
-			onClick={() => navigate('create')}>
-			Add Repair Part
-		</Button>
-	), [navigate]);
-
 	const tableRows = useMemo(() => {
 		return repairPartsData.map((part) => (
 			<RepairPartRow
@@ -166,9 +155,13 @@ const EquipmentRepairPartsList = () => {
 			<>
 				<Outlet />
 				<PageLayout>
-					<ListHeaderLayout titleText="Repair Parts">
-						{headerContent}
-					</ListHeaderLayout>
+					<ListHeaderLayout
+						buttonText="Add Repair Part"
+						onButtonClick={() => navigate('create')}
+						titleText="Repair Parts"
+						searchPlaceholderText="Search repair parts"
+						searchFilter={searchFilter}
+						onSearchInput={(value) => dispatch(setSearchFilter(value))} />
 					<DataTable
 						fields={fields}
 						rows={tableRows}

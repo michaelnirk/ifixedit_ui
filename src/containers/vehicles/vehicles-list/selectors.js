@@ -1,11 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { rootApi } from '@/state/api/rootApi';
-import { selectShowArchived } from '@/containers/vehicles/vehicles-list/slice';
+import { selectSearchFilter, selectShowArchived } from '@/containers/vehicles/vehicles-list/slice';
 import { selectUserId } from '@/state/features/authSlice';
 import { sortItems } from '@/utils/sort';
-
-// const selectVehiclesData = (state) =>
-//   rootApi.endpoints.listVehicles.select()(state)?.data || [];
 
 const selectVehiclesData = createSelector(
 	[
@@ -34,8 +31,22 @@ export const selectArchivedFilteredVehicles = createSelector(
 	}
 );
 
-export const selectSortedVehicleData = createSelector(
+const filteredVehicles = createSelector(
 	selectArchivedFilteredVehicles,
+	selectSearchFilter,
+	(vehicles, searchFilter) => {
+		if (!searchFilter) {
+			return vehicles;
+		}
+		const keys = ['name', 'make', 'model', 'vin', 'license_plate'];
+		return vehicles.filter((vehicle) =>
+			keys.some((key) => vehicle[key]?.toLowerCase().includes(searchFilter.toLowerCase()))
+		);
+	}
+);
+
+export const selectSortedVehicleData = createSelector(
+	filteredVehicles,
 	(state) => state.vehiclesList.sortedBy,
 	(vehicles, sortedBy) => {
 		return sortItems(vehicles, sortedBy);
