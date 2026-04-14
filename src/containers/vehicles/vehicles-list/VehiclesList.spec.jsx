@@ -174,7 +174,7 @@ describe('VehiclesList', () => {
 			}
 		});
 
-		fireEvent.change(screen.getByPlaceholderText('Search vehicles'), { target: { value: 'toyota' } });
+		fireEvent.change(screen.getByPlaceholderText('Search Vehicles'), { target: { value: 'toyota' } });
 
 		expect(store.getState().vehiclesList.searchFilter).toBe(setSearchFilter('toyota').payload);
 	});
