@@ -31,8 +31,7 @@ const HomePage = () => {
 
 	return (
 		<Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', margin: 4 }}>
-			<Typography variant="h4">Let&apos;s fix some shit!</Typography>
-			<Typography variant="h6">Select what need&apos;s fixing</Typography>
+			<Typography variant="h4">Let&apos;s fix something!</Typography>
 			<Box sx={{ alignItems: 'center', display: 'flex', gap: '16px', marginTop: 4 }}>
 				{
 					items.map((item) => (
