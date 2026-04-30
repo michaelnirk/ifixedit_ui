@@ -93,7 +93,7 @@ const StructuresList = () => {
 				currencies={currencies}
 				acquisitionMethods={acquisitionMethods}
 				onEdit={(id) => onEdit(id)}
-				onShowRepairs={(id) => onShowRepairs(id)} />
+				onShowRepairs={onShowRepairs} />
 		));
 	}, [structures, currencies, acquisitionMethods, onEdit, onShowRepairs]);
 

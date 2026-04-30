@@ -83,7 +83,7 @@ const EquipmentList = () => {
 				equipmentItem={equipmentItem}
 				currencies={currencies}
 				onEdit={(id) => onEdit(id)}
-				onShowRepairs={(id) => onShowRepairs(id)} />
+				onShowRepairs={onShowRepairs} />
 		));
 	}, [equipment, currencies, onEdit, onShowRepairs]);
 

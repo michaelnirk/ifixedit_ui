@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import Edit from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import dayjs from 'dayjs';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -21,8 +21,21 @@ const RepairPartRow = ({ part, currencies = [], onEdit, onDeleteRepairPart }) =>
 		return Intl.NumberFormat(currency.currency_language, { currency: currency.currency_code, style: 'currency' }).format(part.part_cost);
 	}, [part.part_cost, part.part_cost_currency, currencies]);
 
+	const localOnDeleteRepairPart = useCallback((e) => {
+		e.stopPropagation();
+		onDeleteRepairPart(part.part_id);
+	}, [onDeleteRepairPart, part.part_id]);
+
+	const onRowClick = useCallback(() => {
+		onEdit(part.part_id);
+	}, [onEdit, part.part_id]);
+
 	return (
-		<TableRow hover key={part.part_id} >
+		<TableRow
+			hover
+			key={part.part_id}
+			onClick={onRowClick}
+			sx={{ cursor: 'pointer' }}>
 			<TableCell>{part.description}</TableCell>
 			<TableCell>{part.part_number}</TableCell>
 			<TableCell>{part.source}</TableCell>
@@ -47,7 +60,7 @@ const RepairPartRow = ({ part, currencies = [], onEdit, onDeleteRepairPart }) =>
 						placement="top"
 						title="Delete Repair Part">
 						<IconButton
-							onClick={() => onDeleteRepairPart(part.part_id)}
+							onClick={localOnDeleteRepairPart}
 							size="small">
 							<DeleteIcon />
 						</IconButton>

@@ -6,7 +6,7 @@ import Edit from '@mui/icons-material/Edit';
 import ConstructionOutlinedIcon from '@mui/icons-material/ConstructionOutlined';
 import BadgeComponent from '@/components/Badge';
 import dayjs from 'dayjs';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 const EquipmentItemRow = ({ equipmentItem, currencies = [], onEdit, onShowRepairs }) => {
@@ -21,8 +21,17 @@ const EquipmentItemRow = ({ equipmentItem, currencies = [], onEdit, onShowRepair
 		return Intl.NumberFormat(currency.currency_language, { currency: currency.currency_code, style: 'currency' }).format(equipmentItem.cost);
 	}, [equipmentItem.cost, equipmentItem.cost_currency, currencies]);
 
+	const localOnShowRepairs = useCallback((e) => {
+		e.stopPropagation();
+		onShowRepairs(equipmentItem.equipment_id);
+	}, [onShowRepairs, equipmentItem.equipment_id]);
+
 	return (
-		<TableRow hover key={equipmentItem.equipment_id} >
+		<TableRow
+			hover
+			key={equipmentItem.equipment_id}
+			onClick={() => onEdit(equipmentItem.equipment_id)}
+			sx={{ cursor: 'pointer' }}>
 			<TableCell>{equipmentItem.name}</TableCell>
 			<TableCell>{equipmentItem.description}</TableCell>
 			<TableCell>{equipmentItem.acquisition_date ? dayjs(equipmentItem.acquisition_date).format('DD MMM YYYY') : ''}</TableCell>
@@ -45,7 +54,7 @@ const EquipmentItemRow = ({ equipmentItem, currencies = [], onEdit, onShowRepair
 							placement="top"
 							title={`View Repairs for ${equipmentItem.name}`}>
 							<IconButton
-								onClick={() => onShowRepairs(equipmentItem.equipment_id)}
+								onClick={localOnShowRepairs}
 								size="small">
 								<ConstructionOutlinedIcon />
 							</IconButton>

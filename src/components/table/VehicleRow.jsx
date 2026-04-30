@@ -6,7 +6,7 @@ import CarRepairIcon from '@mui/icons-material/CarRepair';
 import Edit from '@mui/icons-material/Edit';
 import BadgeComponent from '@/components/Badge';
 import dayjs from 'dayjs';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 const VehicleRow = ({ vehicle, currencies = [], onEdit, onShowRepairs }) => {
@@ -21,8 +21,17 @@ const VehicleRow = ({ vehicle, currencies = [], onEdit, onShowRepairs }) => {
 		return Intl.NumberFormat(currency.currency_language, { currency: currency.currency_code, style: 'currency' }).format(vehicle.purchase_price);
 	}, [vehicle.purchase_price, vehicle.purchase_currency, currencies]);
 
+	const localOnShowRepairs = useCallback((e, vehicleId) => {
+		e.stopPropagation();
+		onShowRepairs(vehicleId);
+	}, [onShowRepairs]);
+
 	return (
-		<TableRow hover key={vehicle.vehicle_id} >
+		<TableRow
+			hover
+			key={vehicle.vehicle_id}
+			onClick={() => onEdit(vehicle.vehicle_id)}
+			sx={{ cursor: 'pointer' }}>
 			<TableCell>{vehicle.name}</TableCell>
 			<TableCell>{vehicle.year}</TableCell>
 			<TableCell>{vehicle.make}</TableCell>
@@ -51,7 +60,7 @@ const VehicleRow = ({ vehicle, currencies = [], onEdit, onShowRepairs }) => {
 							placement="top"
 							title={`View Repairs for ${vehicle.name}`}>
 							<IconButton
-								onClick={() => onShowRepairs(vehicle.vehicle_id)}
+								onClick={(e) => localOnShowRepairs(e, vehicle.vehicle_id)}
 								size="small">
 								<CarRepairIcon />
 							</IconButton>

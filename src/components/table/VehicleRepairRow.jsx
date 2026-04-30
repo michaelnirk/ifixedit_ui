@@ -7,7 +7,7 @@ import Edit from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BadgeComponent from '@/components/Badge';
 import dayjs from 'dayjs';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 const VehicleRepairRow = ({ repair, currencies = [], onEdit, onDeleteRepair, onShowParts }) => {
@@ -22,8 +22,26 @@ const VehicleRepairRow = ({ repair, currencies = [], onEdit, onDeleteRepair, onS
 		return Intl.NumberFormat(currency.currency_language, { currency: currency.currency_code, style: 'currency' }).format(repair.repair_cost);
 	}, [repair.repair_cost, repair.repair_cost_currency, currencies]);
 
+	const localOnShowParts = useCallback((e) => {
+		e.stopPropagation();
+		onShowParts(repair.repair_id);
+	}, [onShowParts, repair.repair_id]);
+
+	const localOnDeleteRepair = useCallback((e) => {
+		e.stopPropagation();
+		onDeleteRepair(repair.repair_id);
+	}, [onDeleteRepair, repair.repair_id]);
+
+	const onRowClick = useCallback(() => {
+		onEdit(repair.repair_id);
+	}, [onEdit, repair.repair_id]);
+
 	return (
-		<TableRow hover key={repair.repair_id} >
+		<TableRow
+			hover
+			key={repair.repair_id}
+			onClick={onRowClick}
+			sx={{ cursor: 'pointer' }}>
 			<TableCell>{repair.description}</TableCell>
 			<TableCell>{repair.repair_date ? dayjs(repair.repair_date).format('DD MMM YYYY') : ''}</TableCell>
 			<TableCell>{repair.repair_location}</TableCell>
@@ -47,7 +65,7 @@ const VehicleRepairRow = ({ repair, currencies = [], onEdit, onDeleteRepair, onS
 							placement="top"
 							title="View Repair Parts">
 							<IconButton
-								onClick={() => onShowParts(repair.repair_id)}
+								onClick={localOnShowParts}
 								size="small">
 								<MiscellaneousServicesOutlinedIcon />
 							</IconButton>
@@ -58,7 +76,7 @@ const VehicleRepairRow = ({ repair, currencies = [], onEdit, onDeleteRepair, onS
 						placement="top"
 						title="Delete Repair">
 						<IconButton
-							onClick={() => onDeleteRepair(repair.repair_id)}
+							onClick={localOnDeleteRepair}
 							size="small">
 							<DeleteIcon />
 						</IconButton>

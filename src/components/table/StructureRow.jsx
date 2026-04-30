@@ -6,7 +6,7 @@ import Edit from '@mui/icons-material/Edit';
 import ConstructionOutlinedIcon from '@mui/icons-material/ConstructionOutlined';
 import BadgeComponent from '@/components/Badge';
 import dayjs from 'dayjs';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 const StructureRow = ({ structure, currencies = [], acquisitionMethods, onEdit, onShowRepairs }) => {
@@ -27,8 +27,17 @@ const StructureRow = ({ structure, currencies = [], acquisitionMethods, onEdit, 
 			: '';
 	}, [acquisitionMethods, structure.how_acquired]);
 
+	const localShowRepairs = useCallback((e) => {
+		e.stopPropagation();
+		onShowRepairs(structure.structure_id);
+	}, [onShowRepairs, structure.structure_id]);
+
 	return (
-		<TableRow hover key={structure.structure_id} >
+		<TableRow
+			hover
+			key={structure.structure_id}
+			onClick={() => onEdit(structure.structure_id)}
+			sx={{ cursor: 'pointer' }}>
 			<TableCell>{structure.name}</TableCell>
 			<TableCell>{structure.description}</TableCell>
 			<TableCell>{acquisitionTypeValue}</TableCell>
@@ -52,7 +61,7 @@ const StructureRow = ({ structure, currencies = [], acquisitionMethods, onEdit, 
 							placement="top"
 							title={`View Repairs for ${structure.name}`}>
 							<IconButton
-								onClick={() => onShowRepairs(structure.structure_id)}
+								onClick={(e) => localShowRepairs(e, structure.structure_id)}
 								size="small">
 								<ConstructionOutlinedIcon />
 							</IconButton>
