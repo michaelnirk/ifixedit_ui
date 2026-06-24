@@ -47,11 +47,11 @@ const VehicleRepairPartEditor = () => {
 			brand: '',
 			description: '',
 			notes: [],
-			part_cost: '',
+			part_cost: 0.00,
 			part_cost_currency: '10049', // Default to USD
 			part_number: '',
 			purchase_date: null,
-			qty: '',
+			qty: 0,
 			repair_id: repairId,
 			source: ''
 		}
@@ -68,11 +68,11 @@ const VehicleRepairPartEditor = () => {
 			setValue('brand', repairPart.brand || '');
 			setValue('description', repairPart.description || '');
 			setValue('notes', repairPart.notes || []);
-			setValue('part_cost', repairPart.part_cost || '');
-			setValue('part_cost_currency', repairPart.part_cost_currency || '');
+			setValue('part_cost', repairPart.part_cost || 0.00);
+			setValue('part_cost_currency', repairPart.part_cost_currency || '10049');
 			setValue('part_number', repairPart.part_number || '');
 			setValue('purchase_date', repairPart.purchase_date ? dayjs(repairPart.purchase_date) : null);
-			setValue('qty', repairPart.qty || '');
+			setValue('qty', repairPart.qty || 0);
 			setValue('source', repairPart.source || '');
 		}
 	}, [repairPart, partId, setValue, repairId]);

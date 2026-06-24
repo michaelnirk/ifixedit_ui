@@ -36,7 +36,7 @@ const RepairFields = ({ control, currencies, errors, config }) => {
 					? [{ flex: 3, label: 'Mileage at Repair', name: 'km_at_repair', type: 'number' }]
 					: []
 			),
-			{ flex: 3, label: 'Repair Cost', name: 'repair_cost', step: '0.01', type: 'number' },
+			{ currency: true, flex: 3, label: 'Repair Cost', name: 'repair_cost', step: '0.01', type: 'number' },
 			{
 				flex: 3,
 				label: 'Repair Cost Currency',

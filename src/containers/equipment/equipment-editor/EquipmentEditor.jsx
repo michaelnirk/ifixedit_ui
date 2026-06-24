@@ -33,9 +33,8 @@ import SchemaFormSection from '@/components/editors/SchemaFormSection';
 const defaultEquipment = {
 	acquisition_date: null,
 	archived: false,
-	cost: '',
-	// Default to USD
-	cost_currency: 10049,
+	cost: 0.00,
+	cost_currency: '10049', // Default to USD
 	description: '',
 	name: '',
 	notes: []
@@ -85,8 +84,8 @@ const EquipmentEditor = () => {
 			methods.setValue('description', equipment.description || '');
 			methods.setValue('acquisition_date', equipment.acquisition_date ? dayjs(equipment.acquisition_date) : null);
 			methods.setValue('name', equipment.name || '');
-			methods.setValue('cost', equipment.cost || '');
-			methods.setValue('cost_currency', equipment.cost_currency || 10049);
+			methods.setValue('cost', equipment.cost || 0.00);
+			methods.setValue('cost_currency', equipment.cost_currency || '10049');
 			methods.setValue('archived', equipment.archived || false);
 			methods.setValue('notes', equipment.notes || []);
 		}

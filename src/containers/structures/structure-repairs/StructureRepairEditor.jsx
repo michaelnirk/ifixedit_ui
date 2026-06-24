@@ -47,7 +47,7 @@ const StructureRepairEditor = () => {
 			end_item_id: '',
 			km_at_repair: '',
 			notes: [],
-			repair_cost: '',
+			repair_cost: 0.00,
 			repair_cost_currency: '10049', // Default to USD
 			repair_date: null,
 			repair_location: ''
@@ -66,8 +66,8 @@ const StructureRepairEditor = () => {
 			setValue('repair_location', repair.repair_location || '');
 			setValue('repair_date', repair.repair_date ? dayjs(repair.repair_date) : null);
 			setValue('km_at_repair', repair.km_at_repair || '');
-			setValue('repair_cost', repair.repair_cost || '');
-			setValue('repair_cost_currency', repair.repair_cost_currency || '');
+			setValue('repair_cost', repair.repair_cost || 0.00);
+			setValue('repair_cost_currency', repair.repair_cost_currency || '10049');
 			setValue('notes', repair.notes || []);
 		}
 	}, [repair, repairId, setValue]);

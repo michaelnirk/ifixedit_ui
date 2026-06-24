@@ -38,7 +38,7 @@ const defaultVehicle = {
 	model: '',
 	name: '',
 	notes: [],
-	purchase_currency: 10049, // Default to USD
+	purchase_currency: '10049', // Default to USD
 	purchase_price: '',
 	vin: '',
 	year: ''

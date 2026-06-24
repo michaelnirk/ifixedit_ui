@@ -18,9 +18,9 @@ const RepairPartFields = ({ control, currencies, errors }) => {
 			{ flex: 4, label: 'Source', name: 'source' }
 		],
 		[
-			{ flex: 3, label: 'Quantity', name: 'qty', required: 'Quantity is required', type: 'number' },
+			{ flex: 3, label: 'Quantity', min: 1, minMessage: 'Quantity must be a positive number', name: 'qty', required: 'Quantity is required', type: 'number' },
 			{ flex: 3, label: 'Purchase Date', name: 'purchase_date', type: 'date' },
-			{ flex: 3, label: 'Part Cost', name: 'part_cost', step: '0.01', type: 'number' },
+			{ currency: true, flex: 3, label: 'Part Cost', name: 'part_cost', step: '0.01', type: 'number' },
 			{
 				flex: 3,
 				label: 'Part Cost Currency',

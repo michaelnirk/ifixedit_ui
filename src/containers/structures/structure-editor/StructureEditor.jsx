@@ -34,7 +34,7 @@ const defaultStructure = {
 	acquisition_date: null,
 	archived: false,
 	cost: '',
-	cost_currency: 10049,
+	cost_currency: '10049', // Default to USD
 	description: '',
 	how_acquired: '',
 	name: '',
@@ -91,8 +91,8 @@ const StructureEditor = () => {
 			methods.setValue('description', structure.description || '');
 			methods.setValue('acquisition_date', structure.acquisition_date ? dayjs(structure.acquisition_date) : null);
 			methods.setValue('how_acquired', structure.how_acquired || null);
-			methods.setValue('cost', structure.cost || '');
-			methods.setValue('cost_currency', structure.cost_currency || 10049);
+			methods.setValue('cost', structure.cost || 0.00);
+			methods.setValue('cost_currency', structure.cost_currency || '10049');
 			methods.setValue('archived', structure.archived || false);
 			methods.setValue('notes', structure.notes || []);
 		}
